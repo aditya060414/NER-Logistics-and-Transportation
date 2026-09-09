@@ -1,0 +1,32 @@
+[
+  {
+    "id": "D102",
+    "cargo_name": "Critical Emergency Medicine & IV Fluids",
+    "cargo_type": "MEDICINE",
+    "priority": "CRITICAL",
+    "origin": "Guwahati Central Medical Store",
+    "origin_coords": { "lat": 26.1445, "lon": 91.7362 },
+    "destination": "Haflong Civil Hospital",
+    "destination_coords": { "lat": 25.1706, "lon": 93.0175 },
+    "assigned_vehicle_id": "V101",
+    "status": "IN_TRANSIT",
+    "scheduled_eta": "2022-06-18T16:00:00Z",
+    "delay_minutes": 135,
+    "risk_level": "HIGH"
+  },
+  {
+    "id": "D103",
+    "cargo_name": "Dry Food Rations & Water Purification Kits",
+    "cargo_type": "FOOD",
+    "priority": "HIGH",
+    "origin": "Jorhat Relief Depot",
+    "origin_coords": { "lat": 26.7509, "lon": 94.2037 },
+    "destination": "Majuli Sub-Divisional Hospital",
+    "destination_coords": { "lat": 26.9602, "lon": 94.2198 },
+    "assigned_vehicle_id": null,
+    "status": "DISPATCH_PENDING",
+    "scheduled_eta": "2022-06-18T18:00:00Z",
+    "delay_minutes": 0,
+    "risk_level": "MEDIUM"
+  }
+]

@@ -1,0 +1,13 @@
+{
+  "scenario_id": "assam_monsoon_2022_stress_test",
+  "name": "Assam Extreme Monsoon Flood & Landslide Stress Test",
+  "date": "2022-06-18",
+  "description": "Simulated flood and landslide conditions across Western & Central Assam with real rainfall records from June 2022.",
+  "key_corridor": "Bijni–Bhetagaon–Panbari",
+  "initial_kpis": {
+    "high_risk_roads": 4622,
+    "active_incidents": 12,
+    "affected_vehicles": 7,
+    "critical_deliveries": 4
+  }
+}

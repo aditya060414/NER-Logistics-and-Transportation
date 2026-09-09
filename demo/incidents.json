@@ -1,0 +1,30 @@
+[
+  {
+    "id": "I102",
+    "type": "LANDSLIDE",
+    "latitude": 26.5052,
+    "longitude": 90.7125,
+    "road_name": "Bijni–Bhetagaon–Panbari",
+    "description": "Massive mudslide and boulder fall blocking both lanes after 48h persistent torrential rain.",
+    "source": "CITIZEN",
+    "status": "UNVERIFIED",
+    "photo_url": "/demo/assets/landslide_bijni.jpg",
+    "submitted_at": "2022-06-18T10:32:00Z",
+    "verified_at": null,
+    "verified_by": null
+  },
+  {
+    "id": "I103",
+    "type": "FLOOD",
+    "latitude": 24.8333,
+    "longitude": 92.7789,
+    "road_name": "Cachar–Katigorah Corridor",
+    "description": "Water logging up to 3 feet over culvert. Small vehicles stranded.",
+    "source": "OFFICER",
+    "status": "VERIFIED",
+    "photo_url": "/demo/assets/flood_cachar.jpg",
+    "submitted_at": "2022-06-18T09:15:00Z",
+    "verified_at": "2022-06-18T09:30:00Z",
+    "verified_by": "SDMA Field Control"
+  }
+]

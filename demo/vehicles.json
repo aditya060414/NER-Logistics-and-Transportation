@@ -1,0 +1,24 @@
+[
+  {
+    "id": "V101",
+    "vehicle_number": "AS-01-TR-102",
+    "vehicle_type": "Truck (Medium Heavy)",
+    "current_latitude": 26.4950,
+    "current_longitude": 90.6850,
+    "status": "AT_RISK",
+    "assigned_delivery_id": "D102",
+    "driver_name": "Ramen Barman",
+    "last_updated": "2022-06-18T10:40:00Z"
+  },
+  {
+    "id": "V102",
+    "vehicle_number": "AS-01-EV-204",
+    "vehicle_type": "Emergency Ambulance / Van",
+    "current_latitude": 26.1800,
+    "current_longitude": 91.7500,
+    "status": "ON_ROUTE",
+    "assigned_delivery_id": "D104",
+    "driver_name": "Pranab Kalita",
+    "last_updated": "2022-06-18T10:41:00Z"
+  }
+]

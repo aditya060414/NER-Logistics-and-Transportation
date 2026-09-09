@@ -1,0 +1,28 @@
+[
+  {
+    "id": "A101",
+    "type": "ROAD_CLOSURE",
+    "severity": "CRITICAL",
+    "title": "Road Closure: Bijni–Panbari Corridor",
+    "message": "Bijni–Panbari road confirmed CLOSED due to landslide. 2 vehicles affected. Recalculating alternate routes.",
+    "district": "Chirang",
+    "road_id": "osm_249102",
+    "delivery_id": "D102",
+    "vehicle_id": "V101",
+    "status": "UNREAD",
+    "created_at": "2022-06-18T10:35:00Z"
+  },
+  {
+    "id": "A102",
+    "type": "HEAVY_RAIN",
+    "severity": "WARNING",
+    "title": "Severe Weather Warning: Cachar District",
+    "message": "Continuous 72h precipitation exceeding 350mm. Elevated landslide risk on hillside roads.",
+    "district": "Cachar",
+    "road_id": null,
+    "delivery_id": null,
+    "vehicle_id": null,
+    "status": "READ",
+    "created_at": "2022-06-18T09:00:00Z"
+  }
+]
