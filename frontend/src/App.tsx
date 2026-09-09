@@ -6,18 +6,25 @@ import { RiskMap } from './components/RiskMap';
 import { RoadDetailPanel } from './components/RoadDetailPanel';
 import { RoutePlanner } from './components/RoutePlanner';
 import { IncidentPanel } from './components/IncidentPanel';
+import { FleetDrawer } from './components/FleetDrawer';
 import { 
   fetchRiskSummary, 
   fetchRiskMap, 
   fetchIncidents, 
   verifyIncident, 
   rejectIncident, 
-  createIncident 
+  createIncident,
+  fetchVehicles,
+  fetchDeliveries,
+  fetchAlerts,
+  evaluateClosureImpact,
+  dispatchReroute
 } from './services/api';
 import type { RiskSummary, RiskGeoJSON, RoadRiskProperties } from './types/risk';
 import type { RoutePlanResponse } from './types/route';
 import type { Incident, IncidentCreateRequest } from './types/incident';
-import { AlertCircle, RefreshCw, Compass, AlertTriangle } from 'lucide-react';
+import type { Vehicle, Delivery, LogisticsAlert } from './types/logistics';
+import { AlertCircle, RefreshCw, Compass, AlertTriangle, Truck } from 'lucide-react';
 
 export function App() {
   const [summary, setSummary] = useState<RiskSummary | null>(null);
@@ -40,17 +47,30 @@ export function App() {
   const [selectedIncidentId, setSelectedIncidentId] = useState<string | null>(null);
   const [isIncidentLoading, setIsIncidentLoading] = useState<boolean>(false);
 
+  // Fleet & Logistics States
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [deliveries, setDeliveries] = useState<Delivery[]>([]);
+  const [alerts, setAlerts] = useState<LogisticsAlert[]>([]);
+  const [isFleetDrawerOpen, setIsFleetDrawerOpen] = useState<boolean>(false);
+  const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(null);
+
   const loadData = useCallback(async (filter: string = selectedFilter) => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const [summaryData, incidentsData] = await Promise.all([
+      const [summaryData, incidentsData, vehiclesData, deliveriesData, alertsData] = await Promise.all([
         fetchRiskSummary(),
-        fetchIncidents()
+        fetchIncidents(),
+        fetchVehicles(),
+        fetchDeliveries(),
+        fetchAlerts()
       ]);
       setSummary(summaryData);
       setIncidents(incidentsData.incidents || []);
+      setVehicles(vehiclesData || []);
+      setDeliveries(deliveriesData || []);
+      setAlerts(alertsData || []);
 
       const levelParam = filter === 'ALL' ? undefined : filter === 'CLOSED' ? undefined : filter;
       const mapData = await fetchRiskMap(levelParam);
@@ -83,6 +103,49 @@ export function App() {
     setSelectedRoad(null);
   };
 
+  // Triggers logistics impact assessment whenever road closures change
+  const triggerClosureImpact = async (updatedBlockedIds: string[]) => {
+    try {
+      const impact = await evaluateClosureImpact(updatedBlockedIds);
+      if (impact.impacted) {
+        if (impact.affected_vehicles.length > 0) {
+          setVehicles((prev) =>
+            prev.map((v) => {
+              const matched = impact.affected_vehicles.find((av) => av.id === v.id);
+              return matched || v;
+            })
+          );
+        }
+        if (impact.affected_deliveries.length > 0) {
+          setDeliveries((prev) =>
+            prev.map((d) => {
+              const matched = impact.affected_deliveries.find((ad) => ad.id === d.id);
+              return matched || d;
+            })
+          );
+
+          // If delivery has auto-recalculated alternate route, render on map
+          const primaryDelivery = impact.affected_deliveries[0];
+          if (primaryDelivery?.alternate_route_summary) {
+            setActiveRouteResponse({
+              origin: { lon: primaryDelivery.origin_coords.lon, lat: primaryDelivery.origin_coords.lat },
+              destination: { lon: primaryDelivery.destination_coords.lon, lat: primaryDelivery.destination_coords.lat },
+              priority: primaryDelivery.priority,
+              recommended: primaryDelivery.alternate_route_summary,
+              alternatives: [],
+              no_safe_route: false,
+            });
+          }
+        }
+        if (impact.new_alerts.length > 0) {
+          setAlerts((prev) => [...impact.new_alerts, ...prev]);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to evaluate closure impact:', err);
+    }
+  };
+
   const handleToggleClosure = (osmId: string, currentStatus: string) => {
     if (!geojsonData) return;
     
@@ -113,14 +176,15 @@ export function App() {
       });
     }
 
-    // Update blocked roads list for routing
-    setBlockedRoadOsmIds((prev) => {
-      if (newStatus === 'CLOSED') {
-        return prev.includes(osmId) ? prev : [...prev, osmId];
-      } else {
-        return prev.filter((id) => id !== osmId);
-      }
-    });
+    const updatedBlocked = newStatus === 'CLOSED'
+      ? (blockedRoadOsmIds.includes(osmId) ? blockedRoadOsmIds : [...blockedRoadOsmIds, osmId])
+      : blockedRoadOsmIds.filter((id) => id !== osmId);
+
+    setBlockedRoadOsmIds(updatedBlocked);
+
+    if (newStatus === 'CLOSED') {
+      triggerClosureImpact(updatedBlocked);
+    }
 
     if (summary) {
       setSummary({
@@ -151,12 +215,10 @@ export function App() {
     try {
       const res = await verifyIncident(incidentId);
       if (res.success && res.incident) {
-        // Update incident in list
         setIncidents((prev) =>
           prev.map((item) => (item.id === incidentId ? res.incident : item))
         );
 
-        // If incident targets an OSM Road segment, close it dynamically
         const targetOsmId = res.incident.osm_id;
         if (targetOsmId) {
           handleToggleClosure(targetOsmId, 'OPEN');
@@ -204,7 +266,31 @@ export function App() {
     setIsIncidentPanelOpen(true);
   };
 
+  // Dispatch Detour to Driver Action
+  const handleDispatchRerouteAction = async (vehicleId: string) => {
+    try {
+      const res = await dispatchReroute(vehicleId);
+      if (res.success) {
+        setVehicles((prev) =>
+          prev.map((v) => (v.id === vehicleId ? res.vehicle : v))
+        );
+        if (res.delivery) {
+          setDeliveries((prev) =>
+            prev.map((d) => (d.id === res.delivery.id ? res.delivery : d))
+          );
+        }
+      }
+    } catch (err) {
+      console.error('Failed to dispatch detour:', err);
+    }
+  };
+
+  const handleFocusVehicleOnMap = (veh: Vehicle) => {
+    setSelectedVehicleId(veh.id);
+  };
+
   const unverifiedCount = incidents.filter((i) => i.status === 'UNVERIFIED').length;
+  const atRiskCount = vehicles.filter((v) => v.status === 'AT_RISK').length;
 
   return (
     <div className="flex flex-col h-screen w-screen bg-gray-950 text-gray-100 overflow-hidden font-sans">
@@ -220,13 +306,16 @@ export function App() {
         isIncidentPanelOpen={isIncidentPanelOpen}
         onToggleIncidentPanel={() => setIsIncidentPanelOpen((prev) => !prev)}
         unverifiedIncidentsCount={unverifiedCount}
+        isFleetDrawerOpen={isFleetDrawerOpen}
+        onToggleFleetDrawer={() => setIsFleetDrawerOpen((prev) => !prev)}
+        atRiskVehiclesCount={atRiskCount}
       />
 
       <KPICards
         summary={summary}
         activeIncidentsCount={incidents.length}
-        affectedVehiclesCount={7}
-        criticalDeliveriesCount={4}
+        affectedVehiclesCount={atRiskCount}
+        criticalDeliveriesCount={deliveries.filter((d) => d.priority === 'CRITICAL').length}
       />
 
       <div className="relative flex-1 w-full h-full overflow-hidden">
@@ -255,7 +344,7 @@ export function App() {
           </div>
         )}
 
-        {/* Leaflet Risk Map with Route and Incident Rendering */}
+        {/* Leaflet Risk Map with Route, Incidents, and Live Fleet Markers */}
         <RiskMap
           geojsonData={geojsonData}
           selectedRoad={selectedRoad}
@@ -265,6 +354,8 @@ export function App() {
           selectedRouteType={selectedRouteType}
           incidents={incidents}
           onSelectIncident={handleSelectIncidentOnMap}
+          vehicles={vehicles}
+          onSelectVehicle={handleFocusVehicleOnMap}
         />
 
         {/* Floating Filter / Legend on Left */}
@@ -287,22 +378,31 @@ export function App() {
               />
               
               <div className="flex gap-2">
-                {/* Quick Launch Route Planner Button */}
+                {/* Route Planner Button */}
                 <button
                   onClick={() => setIsRoutePlannerOpen(true)}
-                  className="flex-1 flex items-center justify-center gap-2 py-2 px-3 bg-gray-900/90 hover:bg-gray-800 backdrop-blur-md border border-gray-700 text-white font-semibold rounded-lg shadow-xl text-xs transition group"
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2 px-2.5 bg-gray-900/90 hover:bg-gray-800 backdrop-blur-md border border-gray-700 text-white font-semibold rounded-lg shadow-xl text-xs transition group"
                 >
                   <Compass className="w-4 h-4 text-blue-400 group-hover:rotate-45 transition-transform" />
                   <span>Route Planner</span>
                 </button>
 
-                {/* Quick Launch Incident Queue */}
+                {/* Incident Queue Button */}
                 <button
                   onClick={() => setIsIncidentPanelOpen(true)}
-                  className="flex items-center justify-center gap-1.5 py-2 px-3 bg-amber-950/80 hover:bg-amber-900/80 backdrop-blur-md border border-amber-800/80 text-amber-200 font-semibold rounded-lg shadow-xl text-xs transition"
+                  className="flex items-center justify-center gap-1 py-2 px-2.5 bg-amber-950/80 hover:bg-amber-900/80 backdrop-blur-md border border-amber-800/80 text-amber-200 font-semibold rounded-lg shadow-xl text-xs transition"
                 >
-                  <AlertTriangle className="w-4 h-4 text-amber-400" />
+                  <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
                   <span>Queue ({unverifiedCount})</span>
+                </button>
+
+                {/* Fleet & Detour Button */}
+                <button
+                  onClick={() => setIsFleetDrawerOpen(true)}
+                  className="flex items-center justify-center gap-1 py-2 px-2.5 bg-blue-950/80 hover:bg-blue-900/80 backdrop-blur-md border border-blue-800/80 text-blue-200 font-semibold rounded-lg shadow-xl text-xs transition"
+                >
+                  <Truck className="w-3.5 h-3.5 text-blue-400" />
+                  <span>Fleet ({vehicles.length})</span>
                 </button>
               </div>
             </div>
@@ -333,6 +433,19 @@ export function App() {
           onSelectIncidentOnMap={handleSelectIncidentOnMap}
           selectedIncidentId={selectedIncidentId}
           isLoading={isIncidentLoading}
+        />
+
+        {/* Fleet & Logistics Impact Drawer */}
+        <FleetDrawer
+          isOpen={isFleetDrawerOpen}
+          onClose={() => setIsFleetDrawerOpen(false)}
+          vehicles={vehicles}
+          deliveries={deliveries}
+          alerts={alerts}
+          onDispatchReroute={handleDispatchRerouteAction}
+          onFocusVehicleOnMap={handleFocusVehicleOnMap}
+          selectedVehicleId={selectedVehicleId}
+          activeRouteResponse={activeRouteResponse}
         />
 
         {/* Emergency Mode Announcement Banner */}

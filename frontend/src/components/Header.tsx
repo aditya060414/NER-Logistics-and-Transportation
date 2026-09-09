@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldAlert, Activity, RefreshCw, Compass, AlertTriangle } from 'lucide-react';
+import { ShieldAlert, Activity, RefreshCw, Compass, AlertTriangle, Truck } from 'lucide-react';
 
 interface HeaderProps {
   scenarioName: string;
@@ -13,6 +13,9 @@ interface HeaderProps {
   isIncidentPanelOpen: boolean;
   onToggleIncidentPanel: () => void;
   unverifiedIncidentsCount: number;
+  isFleetDrawerOpen: boolean;
+  onToggleFleetDrawer: () => void;
+  atRiskVehiclesCount: number;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -27,6 +30,9 @@ export const Header: React.FC<HeaderProps> = ({
   isIncidentPanelOpen,
   onToggleIncidentPanel,
   unverifiedIncidentsCount,
+  isFleetDrawerOpen,
+  onToggleFleetDrawer,
+  atRiskVehiclesCount,
 }) => {
   return (
     <header className="bg-gray-900 border-b border-gray-800 px-6 py-3.5 flex flex-wrap items-center justify-between gap-4 select-none">
@@ -57,6 +63,24 @@ export const Header: React.FC<HeaderProps> = ({
           <span className="text-gray-500">|</span>
           <span className="text-gray-400">13,093 Roads Monitored</span>
         </div>
+
+        {/* Fleet & Logistics Impact Toggle */}
+        <button
+          onClick={onToggleFleetDrawer}
+          className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-semibold transition-all border ${
+            isFleetDrawerOpen
+              ? 'bg-blue-600 text-white border-blue-500 shadow-[0_0_12px_rgba(59,130,246,0.5)]'
+              : 'bg-gray-800 text-gray-300 border-gray-700 hover:border-blue-500 hover:text-blue-300'
+          }`}
+        >
+          <Truck className="w-4 h-4 text-blue-400" />
+          <span>FLEET &amp; IMPACT</span>
+          {atRiskVehiclesCount > 0 && (
+            <span className="px-1.5 py-0.2 rounded-full bg-red-500 text-white font-bold text-[10px] animate-pulse">
+              {atRiskVehiclesCount} AT RISK
+            </span>
+          )}
+        </button>
 
         {/* Incidents Queue Toggle */}
         <button

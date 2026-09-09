@@ -1,6 +1,7 @@
 import type { RiskSummary, RiskGeoJSON, RoadRiskDetail } from '../types/risk';
 import type { LogisticsHub, RoutePlanRequest, RoutePlanResponse } from '../types/route';
 import type { IncidentsResponse, IncidentCreateRequest, Incident } from '../types/incident';
+import type { Vehicle, Delivery, LogisticsAlert, ImpactEvaluationResponse } from '../types/logistics';
 
 const API_BASE = '/api';
 
@@ -90,5 +91,60 @@ export async function resetIncidents(): Promise<{ success: boolean }> {
     method: 'POST',
   });
   if (!res.ok) throw new Error('Failed to reset incidents');
+  return res.json();
+}
+
+// Logistics & Fleet API
+export async function fetchVehicles(): Promise<Vehicle[]> {
+  const res = await fetch(`${API_BASE}/logistics/vehicles`);
+  if (!res.ok) throw new Error('Failed to fetch fleet vehicles');
+  return res.json();
+}
+
+export async function fetchDeliveries(): Promise<Delivery[]> {
+  const res = await fetch(`${API_BASE}/logistics/deliveries`);
+  if (!res.ok) throw new Error('Failed to fetch deliveries');
+  return res.json();
+}
+
+export async function fetchAlerts(): Promise<LogisticsAlert[]> {
+  const res = await fetch(`${API_BASE}/logistics/alerts`);
+  if (!res.ok) throw new Error('Failed to fetch alerts');
+  return res.json();
+}
+
+export async function markAlertRead(alertId: string): Promise<{ success: boolean; alert: LogisticsAlert }> {
+  const res = await fetch(`${API_BASE}/logistics/alerts/read/${alertId}`, {
+    method: 'POST',
+  });
+  if (!res.ok) throw new Error(`Failed to mark alert ${alertId} read`);
+  return res.json();
+}
+
+export async function evaluateClosureImpact(closedOsmIds: string[]): Promise<ImpactEvaluationResponse> {
+  const res = await fetch(`${API_BASE}/logistics/evaluate-impact`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ closed_osm_ids: closedOsmIds }),
+  });
+  if (!res.ok) throw new Error('Failed to evaluate logistics impact');
+  return res.json();
+}
+
+export async function dispatchReroute(vehicleId: string): Promise<{ success: boolean; message: string; vehicle: Vehicle; delivery: Delivery }> {
+  const res = await fetch(`${API_BASE}/logistics/dispatch-reroute/${vehicleId}`, {
+    method: 'POST',
+  });
+  if (!res.ok) throw new Error(`Failed to dispatch reroute to vehicle ${vehicleId}`);
+  return res.json();
+}
+
+export async function resetLogistics(): Promise<{ success: boolean }> {
+  const res = await fetch(`${API_BASE}/logistics/reset`, {
+    method: 'POST',
+  });
+  if (!res.ok) throw new Error('Failed to reset logistics state');
   return res.json();
 }

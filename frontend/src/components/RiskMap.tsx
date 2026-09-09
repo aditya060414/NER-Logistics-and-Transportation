@@ -4,6 +4,7 @@ import L from 'leaflet';
 import type { RiskGeoJSON, RoadRiskProperties } from '../types/risk';
 import type { RoutePlanResponse, RouteSummary } from '../types/route';
 import type { Incident } from '../types/incident';
+import type { Vehicle } from '../types/logistics';
 
 interface RiskMapProps {
   geojsonData: RiskGeoJSON | null;
@@ -14,6 +15,8 @@ interface RiskMapProps {
   selectedRouteType?: 'recommended' | 'alternative' | null;
   incidents?: Incident[];
   onSelectIncident?: (incident: Incident) => void;
+  vehicles?: Vehicle[];
+  onSelectVehicle?: (vehicle: Vehicle) => void;
 }
 
 const COLOR_CLOSED = '#4B5563'; // Dark Gray
@@ -51,6 +54,18 @@ const verifiedIncidentIcon = L.divIcon({
   iconAnchor: [13, 13],
 });
 
+// Vehicle Tracking DivIcon
+const getVehicleIcon = (status: string) => {
+  const color = status === 'AT_RISK' ? '#ef4444' : status === 'REROUTED' ? '#10b981' : '#3b82f6';
+  const shadow = status === 'AT_RISK' ? 'rgba(239, 68, 68, 0.9)' : status === 'REROUTED' ? 'rgba(16, 185, 129, 0.9)' : 'rgba(59, 130, 246, 0.9)';
+  return L.divIcon({
+    className: 'custom-vehicle-icon',
+    html: `<div style="display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; background: #0f172a; border: 2px solid ${color}; border-radius: 50%; box-shadow: 0 0 16px ${shadow}; font-size: 15px; cursor: pointer;">🚚</div>`,
+    iconSize: [30, 30],
+    iconAnchor: [15, 15],
+  });
+};
+
 // Component that automatically animates map viewport to frame the calculated route
 function MapBoundsUpdater({ route }: { route: RouteSummary | null }) {
   const map = useMap();
@@ -85,6 +100,8 @@ export const RiskMap: React.FC<RiskMapProps> = ({
   selectedRouteType = 'recommended',
   incidents = [],
   onSelectIncident,
+  vehicles = [],
+  onSelectVehicle,
 }) => {
   const assamCenter: [number, number] = [26.2006, 92.9376];
 
@@ -170,7 +187,6 @@ export const RiskMap: React.FC<RiskMapProps> = ({
   const recommendedRoute = activeRouteResponse?.recommended || null;
   const alternativeRoutes = activeRouteResponse?.alternatives || [];
 
-  // Determine origin and dest points for pin markers
   const originCoord: [number, number] | null = activeRouteResponse?.origin
     ? [activeRouteResponse.origin.lat, activeRouteResponse.origin.lon]
     : null;
@@ -212,7 +228,7 @@ export const RiskMap: React.FC<RiskMapProps> = ({
         {/* Map Bounds Auto-Center on Calculated Route */}
         {routeToFocus && <MapBoundsUpdater route={routeToFocus} />}
 
-        {/* Alternative / Direct Routes */}
+        {/* Alternative Routes */}
         {alternativeRoutes.map((alt, idx) => {
           if (!alt.coordinates || alt.coordinates.length === 0) return null;
           const isFocused = selectedRouteType === 'alternative';
@@ -234,11 +250,6 @@ export const RiskMap: React.FC<RiskMapProps> = ({
                     Distance: {alt.distance_km} km | ETA: {alt.eta_hours}h
                     <br />
                     Risk Level: <strong className="text-amber-400">{alt.risk_level}</strong>
-                    {alt.high_risk_segments > 0 && (
-                      <div className="text-red-400 mt-1">
-                        ⚠️ Traverses {alt.high_risk_segments} high-risk segments
-                      </div>
-                    )}
                   </div>
                 </Popup>
               </Polyline>
@@ -326,6 +337,59 @@ export const RiskMap: React.FC<RiskMapProps> = ({
                       className="w-full mt-1 py-1 px-2 bg-blue-600 hover:bg-blue-500 text-white rounded text-[10px] font-medium transition"
                     >
                       Review in Incident Queue
+                    </button>
+                  )}
+                </div>
+              </Popup>
+            </Marker>
+          );
+        })}
+
+        {/* Live Fleet Vehicles Markers (Simulated GPS) */}
+        {vehicles.map((veh) => {
+          if (!veh.current_latitude || !veh.current_longitude) return null;
+          return (
+            <Marker
+              key={`veh-marker-${veh.id}`}
+              position={[veh.current_latitude, veh.current_longitude]}
+              icon={getVehicleIcon(veh.status)}
+              eventHandlers={{
+                click: () => {
+                  if (onSelectVehicle) onSelectVehicle(veh);
+                },
+              }}
+            >
+              <Popup>
+                <div className="text-xs p-1 space-y-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-mono font-bold text-white">{veh.vehicle_number}</span>
+                    <span
+                      className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
+                        veh.status === 'AT_RISK'
+                          ? 'bg-red-900 text-red-100'
+                          : veh.status === 'REROUTED'
+                          ? 'bg-emerald-900 text-emerald-100'
+                          : 'bg-blue-900 text-blue-100'
+                      }`}
+                    >
+                      {veh.status.replace('_', ' ')}
+                    </span>
+                  </div>
+                  <div className="text-[10px] text-gray-300">
+                    Driver: <strong>{veh.driver_name}</strong>
+                  </div>
+                  <div className="text-[9px] text-gray-400">
+                    Speed: {veh.speed_kmh} km/h • GPS: {veh.current_latitude.toFixed(3)}, {veh.current_longitude.toFixed(3)}
+                  </div>
+                  <div className="text-[9px] text-amber-300 font-medium">
+                    [Simulated Telemetry]
+                  </div>
+                  {onSelectVehicle && (
+                    <button
+                      onClick={() => onSelectVehicle(veh)}
+                      className="w-full mt-1 py-1 px-2 bg-blue-600 hover:bg-blue-500 text-white rounded text-[10px] font-medium transition"
+                    >
+                      View Logistics &amp; Detour Options
                     </button>
                   )}
                 </div>
