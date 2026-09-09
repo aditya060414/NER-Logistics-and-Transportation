@@ -12,6 +12,8 @@ from backend.app.api.risk import router as risk_router
 from backend.app.api.routes import router as routes_router
 from backend.app.api.incidents import router as incidents_router
 from backend.app.api.logistics import router as logistics_router
+from backend.app.api.dashboard import router as dashboard_router
+from backend.app.api.weather import router as weather_router
 from ml.data_loader import get_data_loader
 
 app = FastAPI(
@@ -33,6 +35,8 @@ app.include_router(risk_router)
 app.include_router(routes_router)
 app.include_router(incidents_router)
 app.include_router(logistics_router)
+app.include_router(dashboard_router)
+app.include_router(weather_router)
 
 @app.on_event("startup")
 def startup_event():
