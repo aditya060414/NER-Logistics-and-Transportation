@@ -1,0 +1,41 @@
+{
+  "score_bins": {
+    "low_max": 0.33,
+    "medium_max": 0.66,
+    "high_min": 0.66
+  },
+  "weights": {
+    "rainfall_risk": 0.6,
+    "static_vulnerability": 0.25,
+    "historical_risk": 0.15,
+    "terrain_risk": 0.0
+  },
+  "rainfall_percentiles_mm": {
+    "rain_1d": {
+      "low": 25,
+      "high": 150
+    },
+    "rain_3d": {
+      "low": 50,
+      "high": 300
+    },
+    "rain_7d": {
+      "low": 100,
+      "high": 600
+    },
+    "rain_max_3d": {
+      "low": 30,
+      "high": 200
+    }
+  },
+  "road_class_weights": {
+    "trunk": 0.2,
+    "trunk_link": 0.25,
+    "primary": 0.3,
+    "primary_link": 0.35,
+    "secondary": 0.45,
+    "secondary_link": 0.5,
+    "tertiary": 0.6,
+    "tertiary_link": 0.65
+  }
+}

@@ -49,5 +49,5 @@ dist-ssr/
 .vscode/
 .idea/
 .DS_Store
-Thumbs.db
 *.swp
+.ipynb_checkpoints/

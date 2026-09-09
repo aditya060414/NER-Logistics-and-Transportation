@@ -1,0 +1,16 @@
+{
+  "platform": "NER Logistics Accessibility Intelligence Platform",
+  "region": "Assam State, North Eastern Region",
+  "demo_scenario": {
+    "name": "Assam Monsoon 2022 Extreme Stress Test",
+    "date": "2022-06-18",
+    "active_weather_stations": 38,
+    "road_segments_evaluated": 13093
+  },
+  "risk_model": {
+    "type": "explainable_heuristic_risk_engine",
+    "formula": "0.60 * rainfall_risk + 0.25 * static_vulnerability + 0.15 * historical_risk",
+    "calibration_status": "prototype_heuristic",
+    "reason_for_not_using_ml": "Historical records contain only 5 aggregate corridor events without fine-grained temporal-spatial failure timestamps. Training a supervised classifier on this data would yield severe leakage and statistically invalid accuracy claims. The explainable engine provides honest, transparent, and robust risk attribution."
+  }
+}

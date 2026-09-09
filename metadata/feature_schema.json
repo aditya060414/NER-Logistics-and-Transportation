@@ -1,0 +1,44 @@
+{
+  "features": [
+    {
+      "name": "rainfall_1d",
+      "type": "float",
+      "description": "1-day total rainfall in mm"
+    },
+    {
+      "name": "rainfall_3d",
+      "type": "float",
+      "description": "3-day rolling accumulated rainfall in mm"
+    },
+    {
+      "name": "rainfall_7d",
+      "type": "float",
+      "description": "7-day rolling accumulated rainfall in mm"
+    },
+    {
+      "name": "rainfall_max_3d",
+      "type": "float",
+      "description": "Maximum 24h rainfall in previous 3 days"
+    },
+    {
+      "name": "road_class_risk",
+      "type": "float",
+      "description": "Vulnerability derived from OSM functional road class"
+    },
+    {
+      "name": "infrastructure_risk",
+      "type": "float",
+      "description": "Weighted presence of bridges (70%) and tunnels (30%)"
+    },
+    {
+      "name": "length_risk",
+      "type": "float",
+      "description": "Length exposure normalized against 95th percentile"
+    },
+    {
+      "name": "historical_risk",
+      "type": "int",
+      "description": "Binary flag indicating historical disruption corridor match"
+    }
+  ]
+}

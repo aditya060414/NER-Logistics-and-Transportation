@@ -1,0 +1,6 @@
+event_id,year,district,road_name,incident_type,status,usable_for_ml
+HE001,2021,Lakhimpur,Bolahi to Balipukhuri Road,Road Damage,unresolved,False
+HE002,2021,Chirang,Bijni Panbari Road,Road Breach / Flood,corridor_identified,True
+HE003,2021,Chirang,Sidli ICBP Road,Road Damage,unresolved,False
+HE004,2021,Bongaigaon,Bongaigaon to Kirtanpara Road,Culvert Damage,unresolved,False
+HE005,2021,Cachar,Cachar Katigorah Road,Water Logging / Breach,unresolved,False

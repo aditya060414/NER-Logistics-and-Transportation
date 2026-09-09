@@ -1,0 +1,13 @@
+{
+  "model_type": "Explainable Heuristic Risk Engine",
+  "version": "1.0-prototype",
+  "supervised_ml_feasible": false,
+  "limitation_note": "Awaiting systematic road failure logs from PWD/ASDMA before deploying an XGBoost/Random Forest disruption_next_24h model.",
+  "risk_distribution": {
+    "LOW": 8399,
+    "MEDIUM": 4545,
+    "HIGH": 149
+  },
+  "mean_risk_score": 0.2459805163064233,
+  "max_risk_score": 0.7358
+}

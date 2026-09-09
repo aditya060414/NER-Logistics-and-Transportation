@@ -1,0 +1,6 @@
+{
+  "road_network": "OpenStreetMap Assam major & secondary roads (13,093 segments)",
+  "rainfall_observations": "Central Water Commission (CWC) & Assam Water Resources Dept 2021-2025 daily manual gauge records",
+  "historical_disasters": "ASDMA Flood Memorandums (2021 & 2022)",
+  "routing_graph": "NetworkX MultiDiGraph constructed from OSM edges (15,708 nodes, 33,083 edges)"
+}
