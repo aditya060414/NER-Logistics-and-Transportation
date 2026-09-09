@@ -58,9 +58,20 @@ export function App() {
   const [isFleetDrawerOpen, setIsFleetDrawerOpen] = useState<boolean>(false);
   const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(null);
 
-  // Field Officer Offline App States
-  const [isFieldOfficerModalOpen, setIsFieldOfficerModalOpen] = useState<boolean>(false);
+  const [isFieldOfficerModalOpen, setIsFieldOfficerModalOpen] = useState<boolean>(
+    typeof window !== 'undefined' && (window.location.hash === '#field' || window.location.pathname === '/field')
+  );
   const [pendingOfflineCount, setPendingOfflineCount] = useState<number>(0);
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      if (window.location.hash === '#field' || window.location.pathname === '/field') {
+        setIsFieldOfficerModalOpen(true);
+      }
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
   const checkOfflineQueue = useCallback(async () => {
     try {
@@ -495,6 +506,9 @@ export function App() {
           isOpen={isFieldOfficerModalOpen}
           onClose={() => {
             setIsFieldOfficerModalOpen(false);
+            if (typeof window !== 'undefined' && window.location.hash === '#field') {
+              window.history.pushState(null, '', window.location.pathname);
+            }
             checkOfflineQueue();
           }}
           onIncidentSynced={() => {
