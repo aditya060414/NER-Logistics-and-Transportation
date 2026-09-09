@@ -4,9 +4,11 @@ import { KPICards } from './components/KPICards';
 import { RiskLegend } from './components/RiskLegend';
 import { RiskMap } from './components/RiskMap';
 import { RoadDetailPanel } from './components/RoadDetailPanel';
+import { RoutePlanner } from './components/RoutePlanner';
 import { fetchRiskSummary, fetchRiskMap } from './services/api';
 import type { RiskSummary, RiskGeoJSON, RoadRiskProperties } from './types/risk';
-import { AlertCircle, RefreshCw } from 'lucide-react';
+import type { RoutePlanResponse } from './types/route';
+import { AlertCircle, RefreshCw, Compass } from 'lucide-react';
 
 export function App() {
   const [summary, setSummary] = useState<RiskSummary | null>(null);
@@ -16,6 +18,12 @@ export function App() {
   const [emergencyMode, setEmergencyMode] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Route Planning States
+  const [isRoutePlannerOpen, setIsRoutePlannerOpen] = useState<boolean>(false);
+  const [activeRouteResponse, setActiveRouteResponse] = useState<RoutePlanResponse | null>(null);
+  const [selectedRouteType, setSelectedRouteType] = useState<'recommended' | 'alternative' | null>('recommended');
+  const [blockedRoadOsmIds, setBlockedRoadOsmIds] = useState<string[]>([]);
 
   const loadData = useCallback(async (filter: string = selectedFilter) => {
     setIsLoading(true);
@@ -86,12 +94,37 @@ export function App() {
       });
     }
 
+    // Update blocked roads list for routing
+    setBlockedRoadOsmIds((prev) => {
+      if (newStatus === 'CLOSED') {
+        return prev.includes(osmId) ? prev : [...prev, osmId];
+      } else {
+        return prev.filter((id) => id !== osmId);
+      }
+    });
+
     if (summary) {
       setSummary({
         ...summary,
         closed_roads_count: newStatus === 'CLOSED' ? summary.closed_roads_count + 1 : Math.max(0, summary.closed_roads_count - 1),
       });
     }
+  };
+
+  const handlePlanRouteFromRoad = (road: RoadRiskProperties) => {
+    // Add current road to blocked roads if it's high risk or closed
+    if (!blockedRoadOsmIds.includes(road.osm_id)) {
+      setBlockedRoadOsmIds((prev) => [...prev, road.osm_id]);
+    }
+    setIsRoutePlannerOpen(true);
+  };
+
+  const handleRemoveBlockedRoad = (osmId: string) => {
+    setBlockedRoadOsmIds((prev) => prev.filter((id) => id !== osmId));
+  };
+
+  const handleClearBlockedRoads = () => {
+    setBlockedRoadOsmIds([]);
   };
 
   return (
@@ -102,6 +135,9 @@ export function App() {
         isLoading={isLoading}
         emergencyMode={emergencyMode}
         onToggleEmergency={handleToggleEmergency}
+        isRoutePlannerOpen={isRoutePlannerOpen}
+        onToggleRoutePlanner={() => setIsRoutePlannerOpen((prev) => !prev)}
+        hasActiveRoute={!!activeRouteResponse?.recommended}
       />
 
       <KPICards
@@ -137,40 +173,73 @@ export function App() {
           </div>
         )}
 
+        {/* Leaflet Risk Map with Route Rendering */}
         <RiskMap
           geojsonData={geojsonData}
           selectedRoad={selectedRoad}
           onSelectRoad={handleRoadSelect}
           emergencyMode={emergencyMode}
+          activeRouteResponse={activeRouteResponse}
+          selectedRouteType={selectedRouteType}
         />
 
-        <div className="absolute top-4 left-4 z-[1000] max-w-md">
-          <RiskLegend
-            selectedFilter={selectedFilter}
-            onSelectFilter={handleSelectFilter}
-            counts={
-              summary
-                ? {
-                    low: summary.low_risk_count,
-                    medium: summary.medium_risk_count,
-                    high: summary.high_risk_count,
-                    closed: summary.closed_roads_count,
-                  }
-                : undefined
-            }
-          />
+        {/* Floating Filter / Legend on Left */}
+        <div className="absolute top-4 left-4 z-[900] max-w-md">
+          {!isRoutePlannerOpen && (
+            <div className="space-y-2">
+              <RiskLegend
+                selectedFilter={selectedFilter}
+                onSelectFilter={handleSelectFilter}
+                counts={
+                  summary
+                    ? {
+                        low: summary.low_risk_count,
+                        medium: summary.medium_risk_count,
+                        high: summary.high_risk_count,
+                        closed: summary.closed_roads_count,
+                      }
+                    : undefined
+                }
+              />
+              
+              {/* Quick Launch Route Planner Button */}
+              <button
+                onClick={() => setIsRoutePlannerOpen(true)}
+                className="w-full flex items-center justify-center gap-2 py-2 px-3 bg-gray-900/90 hover:bg-gray-800 backdrop-blur-md border border-gray-700 text-white font-semibold rounded-lg shadow-xl text-xs transition group"
+              >
+                <Compass className="w-4 h-4 text-blue-400 group-hover:rotate-45 transition-transform" />
+                <span>Open Risk-Aware Route Planner</span>
+              </button>
+            </div>
+          )}
         </div>
 
+        {/* Route Planner Floating Panel */}
+        <RoutePlanner
+          isOpen={isRoutePlannerOpen}
+          onClose={() => setIsRoutePlannerOpen(false)}
+          onRoutesCalculated={setActiveRouteResponse}
+          activeRouteResponse={activeRouteResponse}
+          selectedRouteType={selectedRouteType}
+          onSelectRouteType={setSelectedRouteType}
+          blockedRoadOsmIds={blockedRoadOsmIds}
+          onRemoveBlockedRoad={handleRemoveBlockedRoad}
+          onClearBlockedRoads={handleClearBlockedRoads}
+        />
+
+        {/* Emergency Mode Announcement Banner */}
         {emergencyMode && (
           <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] bg-red-600/90 backdrop-blur-md text-white text-xs font-bold px-4 py-1.5 rounded-full border border-red-400 shadow-[0_0_20px_rgba(239,68,68,0.6)] animate-pulse flex items-center gap-2">
             <span>🚨 EMERGENCY OPERATIONS ACTIVE — FOCUSING ON HIGH-RISK &amp; LIFE-CRITICAL CORRIDORS</span>
           </div>
         )}
 
+        {/* Selected Road Details Panel */}
         <RoadDetailPanel
           selectedRoad={selectedRoad}
           onClose={handleClosePanel}
           onToggleClosure={handleToggleClosure}
+          onPlanRouteFromRoad={handlePlanRouteFromRoad}
         />
       </div>
     </div>
