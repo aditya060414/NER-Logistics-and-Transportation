@@ -9,10 +9,22 @@ import pyproj
 from ml.data_loader import get_data_loader
 
 PRIORITY_PENALTIES = {
-    "CRITICAL": 5.0,  # Strongly avoids high & medium risk roads
+    "CRITICAL": 5.0,  # Strongest risk avoidance
     "HIGH": 3.0,
     "NORMAL": 1.5,
     "LOW": 0.5
+}
+
+# Standard Assam Hub Coordinates (lon, lat)
+ASSAM_HUBS = {
+    "guwahati": (91.7362, 26.1445),
+    "tezpur": (92.7926, 26.6528),
+    "haflong": (93.0175, 25.1706),
+    "dibrugarh": (94.9120, 27.4728),
+    "silchar": (92.7976, 24.8333),
+    "jorhat": (94.2037, 26.7509),
+    "bongaigaon": (90.5432, 26.5019),
+    "nagaon": (92.6840, 26.3452)
 }
 
 transformer_to_wgs84 = pyproj.Transformer.from_crs("EPSG:32646", "EPSG:4326", always_xy=True)
@@ -38,8 +50,12 @@ def plan_route(
     orig_node = loader.snap_coordinate_to_node(orig_lon, orig_lat)
     dest_node = loader.snap_coordinate_to_node(dest_lon, dest_lat)
     
-    blocked_set = set(str(x) for x in (blocked_osm_ids or []))
-    risk_factor = PRIORITY_PENALTIES.get(priority.upper(), 3.0)
+    # Combine explicit request blocked IDs with system-wide verified closures
+    system_closed = loader.get_closed_roads()
+    blocked_set = set(str(x).strip() for x in (blocked_osm_ids or set())).union(system_closed)
+    
+    priority_upper = priority.upper()
+    risk_factor = PRIORITY_PENALTIES.get(priority_upper, 3.0)
     
     def safe_weight(u, v, d):
         osm_id = str(d.get("osm_id", ""))
@@ -66,7 +82,26 @@ def plan_route(
             "recommended": None,
             "alternatives": [],
             "no_safe_route": True,
-            "message": "All practical corridors are closed or physically inaccessible."
+            "message": "NO SAFE ROUTE AVAILABLE. All available corridors contain critical restrictions or closures.",
+            "recommended_action": "HOLD VEHICLE AT SAFE LOCATION / RE-ROUTE VIA RELIEF DEPOT"
+        }
+
+    # Verify if safe route accidentally traversed a blocked road (in case entire graph is severed)
+    def check_blocked_traversal(node_path: List[int]) -> int:
+        count = 0
+        for u, v in zip(node_path[:-1], node_path[1:]):
+            edge_data = G[u][v][0]
+            if str(edge_data.get("osm_id", "")) in blocked_set:
+                count += 1
+        return count
+
+    if check_blocked_traversal(safe_nodes) > 0:
+        return {
+            "recommended": None,
+            "alternatives": [],
+            "no_safe_route": True,
+            "message": "NO SAFE ROUTE AVAILABLE. Every feasible corridor is blocked by confirmed closures.",
+            "recommended_action": "HOLD VEHICLE AT SAFE LOCATION"
         }
 
     def build_route_summary(node_path: List[int], name: str) -> Dict[str, Any]:
@@ -75,10 +110,12 @@ def plan_route(
         coords_wgs84 = []
         high_risk_segments = 0
         max_segment_risk = 0.0
+        segment_osm_ids = []
         
         for u, v in zip(node_path[:-1], node_path[1:]):
             edge_data = G[u][v][0]
             osm_id = str(edge_data.get("osm_id", ""))
+            segment_osm_ids.append(osm_id)
             total_dist_km += edge_data.get("length_km", 0.0)
             total_time_min += edge_data.get("travel_time_min", 0.0)
             
@@ -109,18 +146,40 @@ def plan_route(
             "risk_level": overall_risk,
             "high_risk_segments": high_risk_segments,
             "max_risk_score": round(max_segment_risk, 3),
-            "coordinates": coords_wgs84[::2] # Decimate for network efficiency
+            "segment_osm_ids": segment_osm_ids,
+            "coordinates": coords_wgs84[::2]
         }
 
-    recommended = build_route_summary(safe_nodes, f"Recommended Safe Route ({priority} Cargo)")
-    fastest = build_route_summary(fastest_nodes, "Fastest Route (Direct)")
+    recommended = build_route_summary(safe_nodes, f"Recommended Safe Route ({priority_upper} Cargo)")
+    fastest = build_route_summary(fastest_nodes, "Fastest Direct Route")
     
+    # Calculate avoided high risk segments
+    avoided_count = max(0, fastest["high_risk_segments"] - recommended["high_risk_segments"])
+    recommended["avoided_high_risk_roads"] = avoided_count
+    
+    if avoided_count > 0:
+        recommended["explanation"] = f"Bypasses {avoided_count} high-risk road segment(s) prone to landslide/flooding. Prioritizes cargo safety."
+    else:
+        recommended["explanation"] = f"Optimal corridor selected for {priority_upper} priority with lowest cumulative weather risk."
+
     alternatives = []
     if fastest["coordinates"] != recommended["coordinates"]:
+        fastest["explanation"] = "Direct corridor with shortest travel time, but passes through elevated risk zones."
         alternatives.append(fastest)
+
+    tradeoff_text = "Safe route is directly optimal."
+    if alternatives:
+        time_diff = round(recommended["eta_minutes"] - fastest["eta_minutes"], 1)
+        dist_diff = round(recommended["distance_km"] - fastest["distance_km"], 1)
+        tradeoff_text = f"Safe route adds +{dist_diff} km and +{time_diff} mins ETA to avoid hazardous flood/landslide exposure."
 
     return {
         "recommended": recommended,
         "alternatives": alternatives,
-        "no_safe_route": False
+        "no_safe_route": False,
+        "decision_summary": {
+            "cargo_priority": priority_upper,
+            "tradeoff": tradeoff_text,
+            "blocked_corridors_avoided": len(blocked_set)
+        }
     }
