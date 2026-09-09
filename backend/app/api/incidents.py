@@ -203,6 +203,46 @@ def reject_incident(incident_id: str) -> Dict[str, Any]:
         "incident": target
     }
 
+@router.post("/sync")
+def sync_offline_incidents(reports: List[IncidentCreate]) -> Dict[str, Any]:
+    """
+    Synchronizes offline field officer reports cached in IndexedDB.
+    Returns server acknowledgements with generated server incident IDs.
+    """
+    global incident_seq
+    synced_records = []
+
+    for report in reports:
+        new_id = f"INC-{incident_seq}"
+        incident_seq += 1
+
+        now_iso = datetime.now(timezone.utc).isoformat()
+        new_record = {
+            "id": new_id,
+            "type": report.type.upper(),
+            "road_name": report.road_name,
+            "description": report.description,
+            "source": report.source.upper(),
+            "status": "UNVERIFIED",
+            "latitude": report.latitude,
+            "longitude": report.longitude,
+            "osm_id": report.osm_id,
+            "severity": report.severity.upper(),
+            "photo_url": report.photo_url,
+            "submitted_at": now_iso,
+            "verified_at": None,
+            "verified_by": None
+        }
+        incidents_db.insert(0, new_record)
+        synced_records.append(new_record)
+
+    return {
+        "success": True,
+        "synced_count": len(synced_records),
+        "synced_incidents": synced_records,
+        "message": f"Successfully synchronized {len(synced_records)} offline reports."
+    }
+
 @router.post("/reset")
 def reset_incidents() -> Dict[str, Any]:
     """
@@ -211,3 +251,4 @@ def reset_incidents() -> Dict[str, Any]:
     global incidents_db
     incidents_db = [dict(item) for item in INITIAL_INCIDENTS]
     return {"success": True, "message": "Incidents reset to initial demo state."}
+

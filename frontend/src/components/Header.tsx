@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldAlert, Activity, RefreshCw, Compass, AlertTriangle, Truck } from 'lucide-react';
+import { ShieldAlert, Activity, RefreshCw, Compass, AlertTriangle, Truck, Smartphone } from 'lucide-react';
 
 interface HeaderProps {
   scenarioName: string;
@@ -16,6 +16,8 @@ interface HeaderProps {
   isFleetDrawerOpen: boolean;
   onToggleFleetDrawer: () => void;
   atRiskVehiclesCount: number;
+  onOpenFieldOfficerModal: () => void;
+  pendingOfflineCount: number;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -33,6 +35,8 @@ export const Header: React.FC<HeaderProps> = ({
   isFleetDrawerOpen,
   onToggleFleetDrawer,
   atRiskVehiclesCount,
+  onOpenFieldOfficerModal,
+  pendingOfflineCount,
 }) => {
   return (
     <header className="bg-gray-900 border-b border-gray-800 px-6 py-3.5 flex flex-wrap items-center justify-between gap-4 select-none">
@@ -63,6 +67,25 @@ export const Header: React.FC<HeaderProps> = ({
           <span className="text-gray-500">|</span>
           <span className="text-gray-400">13,093 Roads Monitored</span>
         </div>
+
+        {/* Field App Launcher (Offline Ready) */}
+        <button
+          onClick={onOpenFieldOfficerModal}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold bg-gray-800 hover:bg-gray-700 text-cyan-300 border border-cyan-800/60 hover:border-cyan-500 transition shadow-sm"
+          title="Open Field Officer Mobile App"
+        >
+          <Smartphone className="w-4 h-4 text-cyan-400" />
+          <span>FIELD APP</span>
+          {pendingOfflineCount > 0 ? (
+            <span className="px-1.5 py-0.2 rounded-full bg-red-600 text-white font-bold text-[10px] animate-pulse">
+              {pendingOfflineCount} QUEUED
+            </span>
+          ) : (
+            <span className="text-[9px] bg-cyan-950 text-cyan-400 px-1 rounded border border-cyan-800">
+              IDB
+            </span>
+          )}
+        </button>
 
         {/* Fleet & Logistics Impact Toggle */}
         <button

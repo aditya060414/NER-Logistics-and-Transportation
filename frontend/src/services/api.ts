@@ -86,6 +86,18 @@ export async function rejectIncident(incidentId: string): Promise<{ success: boo
   return res.json();
 }
 
+export async function syncOfflineIncidents(reports: IncidentCreateRequest[]): Promise<{ success: boolean; synced_count: number; synced_incidents: Incident[] }> {
+  const res = await fetch(`${API_BASE}/incidents/sync`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(reports),
+  });
+  if (!res.ok) throw new Error('Failed to synchronize offline incident reports');
+  return res.json();
+}
+
 export async function resetIncidents(): Promise<{ success: boolean }> {
   const res = await fetch(`${API_BASE}/incidents/reset`, {
     method: 'POST',

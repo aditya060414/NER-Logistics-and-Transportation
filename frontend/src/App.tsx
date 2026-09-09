@@ -7,6 +7,8 @@ import { RoadDetailPanel } from './components/RoadDetailPanel';
 import { RoutePlanner } from './components/RoutePlanner';
 import { IncidentPanel } from './components/IncidentPanel';
 import { FleetDrawer } from './components/FleetDrawer';
+import { FieldOfficerModal } from './components/FieldOfficerModal';
+import { AlertBanner } from './components/AlertBanner';
 import { 
   fetchRiskSummary, 
   fetchRiskMap, 
@@ -17,14 +19,16 @@ import {
   fetchVehicles,
   fetchDeliveries,
   fetchAlerts,
+  markAlertRead,
   evaluateClosureImpact,
   dispatchReroute
 } from './services/api';
+import { getPendingReports } from './services/offlineStorage';
 import type { RiskSummary, RiskGeoJSON, RoadRiskProperties } from './types/risk';
 import type { RoutePlanResponse } from './types/route';
 import type { Incident, IncidentCreateRequest } from './types/incident';
 import type { Vehicle, Delivery, LogisticsAlert } from './types/logistics';
-import { AlertCircle, RefreshCw, Compass, AlertTriangle, Truck } from 'lucide-react';
+import { AlertCircle, RefreshCw, Compass, AlertTriangle, Smartphone } from 'lucide-react';
 
 export function App() {
   const [summary, setSummary] = useState<RiskSummary | null>(null);
@@ -54,6 +58,19 @@ export function App() {
   const [isFleetDrawerOpen, setIsFleetDrawerOpen] = useState<boolean>(false);
   const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(null);
 
+  // Field Officer Offline App States
+  const [isFieldOfficerModalOpen, setIsFieldOfficerModalOpen] = useState<boolean>(false);
+  const [pendingOfflineCount, setPendingOfflineCount] = useState<number>(0);
+
+  const checkOfflineQueue = useCallback(async () => {
+    try {
+      const pending = await getPendingReports();
+      setPendingOfflineCount(pending.length);
+    } catch (e) {
+      console.warn('Could not read offline queue:', e);
+    }
+  }, []);
+
   const loadData = useCallback(async (filter: string = selectedFilter) => {
     setIsLoading(true);
     setError(null);
@@ -75,13 +92,15 @@ export function App() {
       const levelParam = filter === 'ALL' ? undefined : filter === 'CLOSED' ? undefined : filter;
       const mapData = await fetchRiskMap(levelParam);
       setGeojsonData(mapData);
+
+      await checkOfflineQueue();
     } catch (err: any) {
       console.error('Error loading risk data:', err);
       setError('Unable to connect to Risk Intelligence Engine at http://localhost:8000. Please ensure the backend server is running.');
     } finally {
       setIsLoading(false);
     }
-  }, [selectedFilter]);
+  }, [selectedFilter, checkOfflineQueue]);
 
   useEffect(() => {
     loadData(selectedFilter);
@@ -124,7 +143,6 @@ export function App() {
             })
           );
 
-          // If delivery has auto-recalculated alternate route, render on map
           const primaryDelivery = impact.affected_deliveries[0];
           if (primaryDelivery?.alternate_route_summary) {
             setActiveRouteResponse({
@@ -266,7 +284,7 @@ export function App() {
     setIsIncidentPanelOpen(true);
   };
 
-  // Dispatch Detour to Driver Action
+  // Dispatch Detour Action
   const handleDispatchRerouteAction = async (vehicleId: string) => {
     try {
       const res = await dispatchReroute(vehicleId);
@@ -289,6 +307,21 @@ export function App() {
     setSelectedVehicleId(veh.id);
   };
 
+  const handleDismissAlert = async (alertId: string) => {
+    try {
+      await markAlertRead(alertId);
+      setAlerts((prev) =>
+        prev.map((a) => (a.id === alertId ? { ...a, status: 'READ' } : a))
+      );
+    } catch (e) {
+      setAlerts((prev) => prev.filter((a) => a.id !== alertId));
+    }
+  };
+
+  const handleOpenAlertDetails = () => {
+    setIsFleetDrawerOpen(true);
+  };
+
   const unverifiedCount = incidents.filter((i) => i.status === 'UNVERIFIED').length;
   const atRiskCount = vehicles.filter((v) => v.status === 'AT_RISK').length;
 
@@ -309,6 +342,8 @@ export function App() {
         isFleetDrawerOpen={isFleetDrawerOpen}
         onToggleFleetDrawer={() => setIsFleetDrawerOpen((prev) => !prev)}
         atRiskVehiclesCount={atRiskCount}
+        onOpenFieldOfficerModal={() => setIsFieldOfficerModalOpen(true)}
+        pendingOfflineCount={pendingOfflineCount}
       />
 
       <KPICards
@@ -316,6 +351,13 @@ export function App() {
         activeIncidentsCount={incidents.length}
         affectedVehiclesCount={atRiskCount}
         criticalDeliveriesCount={deliveries.filter((d) => d.priority === 'CRITICAL').length}
+      />
+
+      {/* Real-Time Alert Banner Toast */}
+      <AlertBanner
+        alerts={alerts}
+        onDismiss={handleDismissAlert}
+        onOpenAlertDetails={handleOpenAlertDetails}
       />
 
       <div className="relative flex-1 w-full h-full overflow-hidden">
@@ -377,32 +419,32 @@ export function App() {
                 }
               />
               
-              <div className="flex gap-2">
+              <div className="grid grid-cols-3 gap-1.5">
                 {/* Route Planner Button */}
                 <button
                   onClick={() => setIsRoutePlannerOpen(true)}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-2 px-2.5 bg-gray-900/90 hover:bg-gray-800 backdrop-blur-md border border-gray-700 text-white font-semibold rounded-lg shadow-xl text-xs transition group"
+                  className="flex items-center justify-center gap-1 py-2 px-1.5 bg-gray-900/90 hover:bg-gray-800 backdrop-blur-md border border-gray-700 text-white font-semibold rounded-lg shadow-xl text-[11px] transition group"
                 >
-                  <Compass className="w-4 h-4 text-blue-400 group-hover:rotate-45 transition-transform" />
-                  <span>Route Planner</span>
+                  <Compass className="w-3.5 h-3.5 text-blue-400 group-hover:rotate-45 transition-transform" />
+                  <span>Route</span>
                 </button>
 
                 {/* Incident Queue Button */}
                 <button
                   onClick={() => setIsIncidentPanelOpen(true)}
-                  className="flex items-center justify-center gap-1 py-2 px-2.5 bg-amber-950/80 hover:bg-amber-900/80 backdrop-blur-md border border-amber-800/80 text-amber-200 font-semibold rounded-lg shadow-xl text-xs transition"
+                  className="flex items-center justify-center gap-1 py-2 px-1.5 bg-amber-950/80 hover:bg-amber-900/80 backdrop-blur-md border border-amber-800/80 text-amber-200 font-semibold rounded-lg shadow-xl text-[11px] transition"
                 >
                   <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
                   <span>Queue ({unverifiedCount})</span>
                 </button>
 
-                {/* Fleet & Detour Button */}
+                {/* Field App Launcher */}
                 <button
-                  onClick={() => setIsFleetDrawerOpen(true)}
-                  className="flex items-center justify-center gap-1 py-2 px-2.5 bg-blue-950/80 hover:bg-blue-900/80 backdrop-blur-md border border-blue-800/80 text-blue-200 font-semibold rounded-lg shadow-xl text-xs transition"
+                  onClick={() => setIsFieldOfficerModalOpen(true)}
+                  className="flex items-center justify-center gap-1 py-2 px-1.5 bg-cyan-950/80 hover:bg-cyan-900/80 backdrop-blur-md border border-cyan-800/80 text-cyan-200 font-semibold rounded-lg shadow-xl text-[11px] transition"
                 >
-                  <Truck className="w-3.5 h-3.5 text-blue-400" />
-                  <span>Fleet ({vehicles.length})</span>
+                  <Smartphone className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>Field App</span>
                 </button>
               </div>
             </div>
@@ -446,6 +488,19 @@ export function App() {
           onFocusVehicleOnMap={handleFocusVehicleOnMap}
           selectedVehicleId={selectedVehicleId}
           activeRouteResponse={activeRouteResponse}
+        />
+
+        {/* Field Officer Offline Reporting Modal */}
+        <FieldOfficerModal
+          isOpen={isFieldOfficerModalOpen}
+          onClose={() => {
+            setIsFieldOfficerModalOpen(false);
+            checkOfflineQueue();
+          }}
+          onIncidentSynced={() => {
+            loadData(selectedFilter);
+            checkOfflineQueue();
+          }}
         />
 
         {/* Emergency Mode Announcement Banner */}
