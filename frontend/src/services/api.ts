@@ -1,5 +1,6 @@
 import type { RiskSummary, RiskGeoJSON, RoadRiskDetail } from '../types/risk';
 import type { LogisticsHub, RoutePlanRequest, RoutePlanResponse } from '../types/route';
+import type { IncidentsResponse, IncidentCreateRequest, Incident } from '../types/incident';
 
 const API_BASE = '/api';
 
@@ -43,5 +44,51 @@ export async function planRoute(req: RoutePlanRequest): Promise<RoutePlanRespons
     const errData = await res.json().catch(() => null);
     throw new Error(errData?.detail || 'Failed to calculate safe route');
   }
+  return res.json();
+}
+
+export async function fetchIncidents(status?: string, source?: string): Promise<IncidentsResponse> {
+  const params = new URLSearchParams();
+  if (status && status !== 'ALL') params.append('status', status);
+  if (source && source !== 'ALL') params.append('source', source);
+
+  const res = await fetch(`${API_BASE}/incidents?${params.toString()}`);
+  if (!res.ok) throw new Error('Failed to fetch incidents');
+  return res.json();
+}
+
+export async function createIncident(data: IncidentCreateRequest): Promise<{ success: boolean; incident: Incident }> {
+  const res = await fetch(`${API_BASE}/incidents`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error('Failed to create incident report');
+  return res.json();
+}
+
+export async function verifyIncident(incidentId: string): Promise<{ success: boolean; incident: Incident; action_taken: any }> {
+  const res = await fetch(`${API_BASE}/incidents/${incidentId}/verify`, {
+    method: 'POST',
+  });
+  if (!res.ok) throw new Error(`Failed to verify incident ${incidentId}`);
+  return res.json();
+}
+
+export async function rejectIncident(incidentId: string): Promise<{ success: boolean; incident: Incident }> {
+  const res = await fetch(`${API_BASE}/incidents/${incidentId}/reject`, {
+    method: 'POST',
+  });
+  if (!res.ok) throw new Error(`Failed to reject incident ${incidentId}`);
+  return res.json();
+}
+
+export async function resetIncidents(): Promise<{ success: boolean }> {
+  const res = await fetch(`${API_BASE}/incidents/reset`, {
+    method: 'POST',
+  });
+  if (!res.ok) throw new Error('Failed to reset incidents');
   return res.json();
 }

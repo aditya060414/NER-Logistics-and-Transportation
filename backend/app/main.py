@@ -10,6 +10,7 @@ if str(ROOT_DIR) not in sys.path:
 
 from backend.app.api.risk import router as risk_router
 from backend.app.api.routes import router as routes_router
+from backend.app.api.incidents import router as incidents_router
 from ml.data_loader import get_data_loader
 
 app = FastAPI(
@@ -29,6 +30,7 @@ app.add_middleware(
 # Register API Routers
 app.include_router(risk_router)
 app.include_router(routes_router)
+app.include_router(incidents_router)
 
 @app.on_event("startup")
 def startup_event():

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldAlert, Activity, RefreshCw, Compass } from 'lucide-react';
+import { ShieldAlert, Activity, RefreshCw, Compass, AlertTriangle } from 'lucide-react';
 
 interface HeaderProps {
   scenarioName: string;
@@ -10,6 +10,9 @@ interface HeaderProps {
   isRoutePlannerOpen: boolean;
   onToggleRoutePlanner: () => void;
   hasActiveRoute: boolean;
+  isIncidentPanelOpen: boolean;
+  onToggleIncidentPanel: () => void;
+  unverifiedIncidentsCount: number;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -21,6 +24,9 @@ export const Header: React.FC<HeaderProps> = ({
   isRoutePlannerOpen,
   onToggleRoutePlanner,
   hasActiveRoute,
+  isIncidentPanelOpen,
+  onToggleIncidentPanel,
+  unverifiedIncidentsCount,
 }) => {
   return (
     <header className="bg-gray-900 border-b border-gray-800 px-6 py-3.5 flex flex-wrap items-center justify-between gap-4 select-none">
@@ -51,6 +57,24 @@ export const Header: React.FC<HeaderProps> = ({
           <span className="text-gray-500">|</span>
           <span className="text-gray-400">13,093 Roads Monitored</span>
         </div>
+
+        {/* Incidents Queue Toggle */}
+        <button
+          onClick={onToggleIncidentPanel}
+          className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-semibold transition-all border ${
+            isIncidentPanelOpen
+              ? 'bg-amber-600 text-white border-amber-500 shadow-[0_0_12px_rgba(245,158,11,0.5)]'
+              : 'bg-gray-800 text-gray-300 border-gray-700 hover:border-amber-500 hover:text-amber-300'
+          }`}
+        >
+          <AlertTriangle className="w-4 h-4 text-amber-400" />
+          <span>INCIDENT QUEUE</span>
+          {unverifiedIncidentsCount > 0 && (
+            <span className="px-1.5 py-0.2 rounded-full bg-amber-500 text-gray-950 font-bold text-[10px]">
+              {unverifiedIncidentsCount}
+            </span>
+          )}
+        </button>
 
         {/* Route Planner Toggle */}
         <button

@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, GeoJSON, Polyline, Marker, Popup, useMap } fro
 import L from 'leaflet';
 import type { RiskGeoJSON, RoadRiskProperties } from '../types/risk';
 import type { RoutePlanResponse, RouteSummary } from '../types/route';
+import type { Incident } from '../types/incident';
 
 interface RiskMapProps {
   geojsonData: RiskGeoJSON | null;
@@ -11,6 +12,8 @@ interface RiskMapProps {
   emergencyMode: boolean;
   activeRouteResponse?: RoutePlanResponse | null;
   selectedRouteType?: 'recommended' | 'alternative' | null;
+  incidents?: Incident[];
+  onSelectIncident?: (incident: Incident) => void;
 }
 
 const COLOR_CLOSED = '#4B5563'; // Dark Gray
@@ -18,7 +21,7 @@ const COLOR_HIGH = '#EF4444';   // Vibrant Red
 const COLOR_MEDIUM = '#F59E0B'; // Amber Yellow
 const COLOR_LOW = '#10B981';    // Emerald Green
 
-// Custom divIcons for logistics depots and medical destinations
+// Custom divIcons for logistics depots and destinations
 const originIcon = L.divIcon({
   className: 'custom-origin-icon',
   html: `<div style="display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: #10B981; border: 2px solid #ffffff; border-radius: 50%; box-shadow: 0 0 15px rgba(16, 185, 129, 0.9); font-size: 14px; cursor: pointer;">🟢</div>`,
@@ -31,6 +34,21 @@ const destIcon = L.divIcon({
   html: `<div style="display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: #3B82F6; border: 2px solid #ffffff; border-radius: 50%; box-shadow: 0 0 15px rgba(59, 130, 246, 0.9); font-size: 14px; cursor: pointer;">🏁</div>`,
   iconSize: [28, 28],
   iconAnchor: [14, 14],
+});
+
+// Incident Warning Icons
+const unverifiedIncidentIcon = L.divIcon({
+  className: 'custom-unverified-incident-icon',
+  html: `<div style="display: flex; align-items: center; justify-content: center; width: 26px; height: 26px; background: #D97706; border: 2px solid #FEF3C7; border-radius: 50%; box-shadow: 0 0 14px rgba(245, 158, 11, 0.9); font-size: 12px; cursor: pointer;">⚠️</div>`,
+  iconSize: [26, 26],
+  iconAnchor: [13, 13],
+});
+
+const verifiedIncidentIcon = L.divIcon({
+  className: 'custom-verified-incident-icon',
+  html: `<div style="display: flex; align-items: center; justify-content: center; width: 26px; height: 26px; background: #DC2626; border: 2px solid #FEE2E2; border-radius: 50%; box-shadow: 0 0 14px rgba(220, 38, 38, 0.9); font-size: 12px; cursor: pointer;">🛑</div>`,
+  iconSize: [26, 26],
+  iconAnchor: [13, 13],
 });
 
 // Component that automatically animates map viewport to frame the calculated route
@@ -65,6 +83,8 @@ export const RiskMap: React.FC<RiskMapProps> = ({
   emergencyMode,
   activeRouteResponse,
   selectedRouteType = 'recommended',
+  incidents = [],
+  onSelectIncident,
 }) => {
   const assamCenter: [number, number] = [26.2006, 92.9376];
 
@@ -192,7 +212,7 @@ export const RiskMap: React.FC<RiskMapProps> = ({
         {/* Map Bounds Auto-Center on Calculated Route */}
         {routeToFocus && <MapBoundsUpdater route={routeToFocus} />}
 
-        {/* Alternative / Direct Routes (Rendered underneath safe route) */}
+        {/* Alternative / Direct Routes */}
         {alternativeRoutes.map((alt, idx) => {
           if (!alt.coordinates || alt.coordinates.length === 0) return null;
           const isFocused = selectedRouteType === 'alternative';
@@ -226,10 +246,9 @@ export const RiskMap: React.FC<RiskMapProps> = ({
           );
         })}
 
-        {/* Recommended Safe Route (Solid Vivid Blue with subtle outer glow) */}
+        {/* Recommended Safe Route */}
         {recommendedRoute && recommendedRoute.coordinates && recommendedRoute.coordinates.length > 0 && (
           <React.Fragment>
-            {/* Outer Glow / Casing */}
             <Polyline
               positions={recommendedRoute.coordinates}
               pathOptions={{
@@ -239,7 +258,6 @@ export const RiskMap: React.FC<RiskMapProps> = ({
                 lineCap: 'round',
               }}
             />
-            {/* Core Solid Blue Route */}
             <Polyline
               positions={recommendedRoute.coordinates}
               pathOptions={{
@@ -267,6 +285,54 @@ export const RiskMap: React.FC<RiskMapProps> = ({
             </Polyline>
           </React.Fragment>
         )}
+
+        {/* Field Incident Markers */}
+        {incidents.map((incident) => {
+          if (!incident.latitude || !incident.longitude) return null;
+          const isVerified = incident.status === 'VERIFIED';
+          const icon = isVerified ? verifiedIncidentIcon : unverifiedIncidentIcon;
+
+          return (
+            <Marker
+              key={`inc-marker-${incident.id}`}
+              position={[incident.latitude, incident.longitude]}
+              icon={icon}
+              eventHandlers={{
+                click: () => {
+                  if (onSelectIncident) onSelectIncident(incident);
+                },
+              }}
+            >
+              <Popup>
+                <div className="text-xs p-1 space-y-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-bold text-white">{incident.id}</span>
+                    <span
+                      className={`text-[9px] font-bold px-1 rounded ${
+                        isVerified ? 'bg-red-900 text-red-200' : 'bg-amber-900 text-amber-200'
+                      }`}
+                    >
+                      {incident.status}
+                    </span>
+                  </div>
+                  <strong className="text-amber-300 block">{incident.road_name}</strong>
+                  <div className="text-gray-300 text-[10px]">{incident.description}</div>
+                  <div className="text-[9px] text-gray-400">
+                    Source: <span className="text-white font-semibold">{incident.source}</span>
+                  </div>
+                  {onSelectIncident && (
+                    <button
+                      onClick={() => onSelectIncident(incident)}
+                      className="w-full mt-1 py-1 px-2 bg-blue-600 hover:bg-blue-500 text-white rounded text-[10px] font-medium transition"
+                    >
+                      Review in Incident Queue
+                    </button>
+                  )}
+                </div>
+              </Popup>
+            </Marker>
+          );
+        })}
 
         {/* Origin & Destination Markers */}
         {originCoord && (

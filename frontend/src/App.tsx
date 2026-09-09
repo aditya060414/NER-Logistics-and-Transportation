@@ -5,10 +5,19 @@ import { RiskLegend } from './components/RiskLegend';
 import { RiskMap } from './components/RiskMap';
 import { RoadDetailPanel } from './components/RoadDetailPanel';
 import { RoutePlanner } from './components/RoutePlanner';
-import { fetchRiskSummary, fetchRiskMap } from './services/api';
+import { IncidentPanel } from './components/IncidentPanel';
+import { 
+  fetchRiskSummary, 
+  fetchRiskMap, 
+  fetchIncidents, 
+  verifyIncident, 
+  rejectIncident, 
+  createIncident 
+} from './services/api';
 import type { RiskSummary, RiskGeoJSON, RoadRiskProperties } from './types/risk';
 import type { RoutePlanResponse } from './types/route';
-import { AlertCircle, RefreshCw, Compass } from 'lucide-react';
+import type { Incident, IncidentCreateRequest } from './types/incident';
+import { AlertCircle, RefreshCw, Compass, AlertTriangle } from 'lucide-react';
 
 export function App() {
   const [summary, setSummary] = useState<RiskSummary | null>(null);
@@ -25,13 +34,23 @@ export function App() {
   const [selectedRouteType, setSelectedRouteType] = useState<'recommended' | 'alternative' | null>('recommended');
   const [blockedRoadOsmIds, setBlockedRoadOsmIds] = useState<string[]>([]);
 
+  // Incident Queue States
+  const [incidents, setIncidents] = useState<Incident[]>([]);
+  const [isIncidentPanelOpen, setIsIncidentPanelOpen] = useState<boolean>(false);
+  const [selectedIncidentId, setSelectedIncidentId] = useState<string | null>(null);
+  const [isIncidentLoading, setIsIncidentLoading] = useState<boolean>(false);
+
   const loadData = useCallback(async (filter: string = selectedFilter) => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const summaryData = await fetchRiskSummary();
+      const [summaryData, incidentsData] = await Promise.all([
+        fetchRiskSummary(),
+        fetchIncidents()
+      ]);
       setSummary(summaryData);
+      setIncidents(incidentsData.incidents || []);
 
       const levelParam = filter === 'ALL' ? undefined : filter === 'CLOSED' ? undefined : filter;
       const mapData = await fetchRiskMap(levelParam);
@@ -112,7 +131,6 @@ export function App() {
   };
 
   const handlePlanRouteFromRoad = (road: RoadRiskProperties) => {
-    // Add current road to blocked roads if it's high risk or closed
     if (!blockedRoadOsmIds.includes(road.osm_id)) {
       setBlockedRoadOsmIds((prev) => [...prev, road.osm_id]);
     }
@@ -127,6 +145,67 @@ export function App() {
     setBlockedRoadOsmIds([]);
   };
 
+  // Incident Verification Flow
+  const handleVerifyIncident = async (incidentId: string) => {
+    setIsIncidentLoading(true);
+    try {
+      const res = await verifyIncident(incidentId);
+      if (res.success && res.incident) {
+        // Update incident in list
+        setIncidents((prev) =>
+          prev.map((item) => (item.id === incidentId ? res.incident : item))
+        );
+
+        // If incident targets an OSM Road segment, close it dynamically
+        const targetOsmId = res.incident.osm_id;
+        if (targetOsmId) {
+          handleToggleClosure(targetOsmId, 'OPEN');
+        }
+      }
+    } catch (err) {
+      console.error('Failed to verify incident:', err);
+    } finally {
+      setIsIncidentLoading(false);
+    }
+  };
+
+  const handleRejectIncident = async (incidentId: string) => {
+    setIsIncidentLoading(true);
+    try {
+      const res = await rejectIncident(incidentId);
+      if (res.success && res.incident) {
+        setIncidents((prev) =>
+          prev.map((item) => (item.id === incidentId ? res.incident : item))
+        );
+      }
+    } catch (err) {
+      console.error('Failed to reject incident:', err);
+    } finally {
+      setIsIncidentLoading(false);
+    }
+  };
+
+  const handleCreateIncident = async (data: IncidentCreateRequest) => {
+    setIsIncidentLoading(true);
+    try {
+      const res = await createIncident(data);
+      if (res.success && res.incident) {
+        setIncidents((prev) => [res.incident, ...prev]);
+      }
+    } catch (err) {
+      console.error('Failed to create incident:', err);
+    } finally {
+      setIsIncidentLoading(false);
+    }
+  };
+
+  const handleSelectIncidentOnMap = (incident: Incident) => {
+    setSelectedIncidentId(incident.id);
+    setIsIncidentPanelOpen(true);
+  };
+
+  const unverifiedCount = incidents.filter((i) => i.status === 'UNVERIFIED').length;
+
   return (
     <div className="flex flex-col h-screen w-screen bg-gray-950 text-gray-100 overflow-hidden font-sans">
       <Header
@@ -138,11 +217,14 @@ export function App() {
         isRoutePlannerOpen={isRoutePlannerOpen}
         onToggleRoutePlanner={() => setIsRoutePlannerOpen((prev) => !prev)}
         hasActiveRoute={!!activeRouteResponse?.recommended}
+        isIncidentPanelOpen={isIncidentPanelOpen}
+        onToggleIncidentPanel={() => setIsIncidentPanelOpen((prev) => !prev)}
+        unverifiedIncidentsCount={unverifiedCount}
       />
 
       <KPICards
         summary={summary}
-        activeIncidentsCount={12}
+        activeIncidentsCount={incidents.length}
         affectedVehiclesCount={7}
         criticalDeliveriesCount={4}
       />
@@ -173,7 +255,7 @@ export function App() {
           </div>
         )}
 
-        {/* Leaflet Risk Map with Route Rendering */}
+        {/* Leaflet Risk Map with Route and Incident Rendering */}
         <RiskMap
           geojsonData={geojsonData}
           selectedRoad={selectedRoad}
@@ -181,6 +263,8 @@ export function App() {
           emergencyMode={emergencyMode}
           activeRouteResponse={activeRouteResponse}
           selectedRouteType={selectedRouteType}
+          incidents={incidents}
+          onSelectIncident={handleSelectIncidentOnMap}
         />
 
         {/* Floating Filter / Legend on Left */}
@@ -202,14 +286,25 @@ export function App() {
                 }
               />
               
-              {/* Quick Launch Route Planner Button */}
-              <button
-                onClick={() => setIsRoutePlannerOpen(true)}
-                className="w-full flex items-center justify-center gap-2 py-2 px-3 bg-gray-900/90 hover:bg-gray-800 backdrop-blur-md border border-gray-700 text-white font-semibold rounded-lg shadow-xl text-xs transition group"
-              >
-                <Compass className="w-4 h-4 text-blue-400 group-hover:rotate-45 transition-transform" />
-                <span>Open Risk-Aware Route Planner</span>
-              </button>
+              <div className="flex gap-2">
+                {/* Quick Launch Route Planner Button */}
+                <button
+                  onClick={() => setIsRoutePlannerOpen(true)}
+                  className="flex-1 flex items-center justify-center gap-2 py-2 px-3 bg-gray-900/90 hover:bg-gray-800 backdrop-blur-md border border-gray-700 text-white font-semibold rounded-lg shadow-xl text-xs transition group"
+                >
+                  <Compass className="w-4 h-4 text-blue-400 group-hover:rotate-45 transition-transform" />
+                  <span>Route Planner</span>
+                </button>
+
+                {/* Quick Launch Incident Queue */}
+                <button
+                  onClick={() => setIsIncidentPanelOpen(true)}
+                  className="flex items-center justify-center gap-1.5 py-2 px-3 bg-amber-950/80 hover:bg-amber-900/80 backdrop-blur-md border border-amber-800/80 text-amber-200 font-semibold rounded-lg shadow-xl text-xs transition"
+                >
+                  <AlertTriangle className="w-4 h-4 text-amber-400" />
+                  <span>Queue ({unverifiedCount})</span>
+                </button>
+              </div>
             </div>
           )}
         </div>
@@ -225,6 +320,19 @@ export function App() {
           blockedRoadOsmIds={blockedRoadOsmIds}
           onRemoveBlockedRoad={handleRemoveBlockedRoad}
           onClearBlockedRoads={handleClearBlockedRoads}
+        />
+
+        {/* Incident Queue Panel */}
+        <IncidentPanel
+          isOpen={isIncidentPanelOpen}
+          onClose={() => setIsIncidentPanelOpen(false)}
+          incidents={incidents}
+          onVerify={handleVerifyIncident}
+          onReject={handleRejectIncident}
+          onCreateIncident={handleCreateIncident}
+          onSelectIncidentOnMap={handleSelectIncidentOnMap}
+          selectedIncidentId={selectedIncidentId}
+          isLoading={isIncidentLoading}
         />
 
         {/* Emergency Mode Announcement Banner */}
