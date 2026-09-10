@@ -168,50 +168,50 @@ export const DriverNewConsignmentView: React.FC<DriverNewConsignmentViewProps> =
   };
 
   return (
-    <div className="w-full max-w-3xl mx-auto space-y-5 p-4 sm:p-6 text-gray-100 font-sans pb-24">
+    <div className="w-full max-w-3xl mx-auto space-y-5 p-4 sm:p-6 text-slate-800 font-sans pb-24">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-mono font-bold text-blue-400 uppercase tracking-widest px-2 py-0.5 rounded-full bg-blue-950/80 border border-blue-600/50">
+            <span className="text-[10px] font-mono font-bold text-blue-700 uppercase tracking-widest px-2 py-0.5 rounded-full bg-blue-50 border border-blue-200">
               STEP 1 OF 3 • CONSIGNMENT ENTRY
             </span>
           </div>
-          <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight uppercase mt-1">
+          <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight uppercase mt-1">
             New Cargo Consignment
           </h2>
-          <p className="text-xs text-gray-400">
+          <p className="text-xs text-slate-500">
             Assigned to {driver.name} ({driver.vehicle_number})
           </p>
         </div>
         <button
           type="button"
           onClick={onCancel}
-          className="text-xs text-gray-400 hover:text-white px-3 py-1.5 rounded-xl bg-gray-900 border border-gray-800"
+          className="text-xs text-slate-700 hover:text-slate-900 px-3 py-1.5 rounded-xl bg-white border border-slate-200 shadow-xs"
         >
           Cancel
         </button>
       </div>
 
       {errorMessage && (
-        <div className="p-4 rounded-2xl bg-red-950/80 border border-red-800 text-red-200 flex items-center gap-3 text-xs">
-          <AlertCircle className="w-5 h-5 text-red-400 shrink-0" />
+        <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 flex items-center gap-3 text-xs">
+          <AlertCircle className="w-5 h-5 text-rose-600 shrink-0" />
           <span>{errorMessage}</span>
         </div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-5">
         {/* Section 1: Consignment ID & Cargo Category */}
-        <div className="bg-gray-900/90 border border-gray-800 rounded-3xl p-5 shadow-2xl space-y-4">
+        <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-xs space-y-4">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-black text-gray-300 uppercase tracking-wider flex items-center gap-2">
-              <Package className="w-4 h-4 text-blue-400" />
+            <span className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
+              <Package className="w-4 h-4 text-blue-600" />
               <span>Consignment Identification</span>
             </span>
             <button
               type="button"
               onClick={() => setConsignmentId(generateConsignmentId())}
-              className="text-[11px] text-blue-400 hover:text-blue-300 flex items-center gap-1 font-mono font-bold"
+              className="text-[11px] text-blue-600 hover:text-blue-700 flex items-center gap-1 font-mono font-bold"
             >
               <RefreshCw className="w-3 h-3" />
               <span>Regenerate ID</span>
@@ -220,22 +220,22 @@ export const DriverNewConsignmentView: React.FC<DriverNewConsignmentViewProps> =
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
             <div>
-              <label className="block text-gray-400 font-bold mb-1">Consignment Waybill #</label>
+              <label className="block text-slate-600 font-bold mb-1">Consignment Waybill #</label>
               <input
                 type="text"
                 value={consignmentId}
                 onChange={(e) => setConsignmentId(e.target.value)}
-                className="w-full bg-gray-950 border border-gray-800 rounded-xl py-2.5 px-3 font-mono text-sm text-blue-300 font-bold focus:border-blue-500 focus:outline-none"
+                className="w-full bg-white border border-slate-200 rounded-xl py-2.5 px-3 font-mono text-sm text-blue-700 font-bold focus:border-blue-500 focus:outline-none"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-gray-400 font-bold mb-1">Cargo Category</label>
+              <label className="block text-slate-600 font-bold mb-1">Cargo Category</label>
               <select
                 value={cargoCategory}
                 onChange={(e) => handleCategoryChange(e.target.value as CargoCategory)}
-                className="w-full bg-gray-950 border border-gray-800 rounded-xl py-2.5 px-3 text-xs text-white font-bold focus:border-blue-500 focus:outline-none"
+                className="w-full bg-white border border-slate-200 rounded-xl py-2.5 px-3 text-xs text-slate-900 font-bold focus:border-blue-500 focus:outline-none"
               >
                 {CARGO_PRESETS.map((p) => (
                   <option key={p.category} value={p.category}>
@@ -247,12 +247,12 @@ export const DriverNewConsignmentView: React.FC<DriverNewConsignmentViewProps> =
           </div>
 
           <div>
-            <label className="block text-gray-400 font-bold text-xs mb-1">Cargo Manifest Title</label>
+            <label className="block text-slate-600 font-bold text-xs mb-1">Cargo Manifest Title</label>
             <input
               type="text"
               value={cargoName}
               onChange={(e) => setCargoName(e.target.value)}
-              className="w-full bg-gray-950 border border-gray-800 rounded-xl py-2.5 px-3 text-xs text-white focus:border-blue-500 focus:outline-none"
+              className="w-full bg-white border border-slate-200 rounded-xl py-2.5 px-3 text-xs text-slate-900 focus:border-blue-500 focus:outline-none"
               placeholder="e.g. Life-saving medical supplies for Dima Hasao relief center"
               required
             />
@@ -260,13 +260,13 @@ export const DriverNewConsignmentView: React.FC<DriverNewConsignmentViewProps> =
         </div>
 
         {/* Section 2: Priority Level & Smart Mapping */}
-        <div className="bg-gray-900/90 border border-gray-800 rounded-3xl p-5 shadow-2xl space-y-3">
+        <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-xs space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-black text-gray-300 uppercase tracking-wider flex items-center gap-2">
-              <ShieldAlert className="w-4 h-4 text-amber-400" />
+            <span className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
+              <ShieldAlert className="w-4 h-4 text-amber-500" />
               <span>Logistics Priority Classification</span>
             </span>
-            <span className="text-[11px] font-mono text-gray-400">
+            <span className="text-[11px] font-mono text-slate-500">
               Impacts AI Road Risk Weighting
             </span>
           </div>
@@ -282,13 +282,13 @@ export const DriverNewConsignmentView: React.FC<DriverNewConsignmentViewProps> =
                   className={`p-3 rounded-2xl border text-center transition flex flex-col items-center justify-center ${
                     isSelected
                       ? p === 'CRITICAL'
-                        ? 'bg-red-950/80 border-red-500 text-red-200 ring-2 ring-red-500/50'
+                        ? 'bg-rose-50 border-rose-500 text-rose-900 ring-1 ring-rose-500 shadow-xs'
                         : p === 'HIGH'
-                        ? 'bg-amber-950/80 border-amber-500 text-amber-200 ring-2 ring-amber-500/50'
+                        ? 'bg-amber-50 border-amber-500 text-amber-900 ring-1 ring-amber-500 shadow-xs'
                         : p === 'NORMAL'
-                        ? 'bg-blue-950/80 border-blue-500 text-blue-200 ring-2 ring-blue-500/50'
-                        : 'bg-gray-800 border-gray-600 text-gray-200 ring-2 ring-gray-600/50'
-                      : 'bg-gray-950/60 border-gray-800 text-gray-400 hover:border-gray-700'
+                        ? 'bg-blue-50 border-blue-500 text-blue-900 ring-1 ring-blue-500 shadow-xs'
+                        : 'bg-slate-100 border-slate-400 text-slate-900 ring-1 ring-slate-400 shadow-xs'
+                      : 'bg-slate-50 border-slate-200 text-slate-600 hover:border-slate-300'
                   }`}
                 >
                   <span className="font-black text-xs uppercase">{p}</span>
@@ -305,61 +305,61 @@ export const DriverNewConsignmentView: React.FC<DriverNewConsignmentViewProps> =
         </div>
 
         {/* Section 3: Quantity & Weight */}
-        <div className="bg-gray-900/90 border border-gray-800 rounded-3xl p-5 shadow-2xl space-y-3">
-          <div className="text-xs font-black text-gray-300 uppercase tracking-wider flex items-center gap-2">
-            <Scale className="w-4 h-4 text-indigo-400" />
+        <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-xs space-y-3">
+          <div className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
+            <Scale className="w-4 h-4 text-indigo-600" />
             <span>Load &amp; Quantity Specifications</span>
           </div>
 
           <div className="grid grid-cols-3 gap-3 text-xs">
             <div>
-              <label className="block text-gray-400 font-bold mb-1">Quantity</label>
+              <label className="block text-slate-600 font-bold mb-1">Quantity</label>
               <input
                 type="number"
                 value={quantity}
                 onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                className="w-full bg-gray-950 border border-gray-800 rounded-xl py-2 px-3 text-white font-mono font-bold focus:border-blue-500 focus:outline-none"
+                className="w-full bg-white border border-slate-200 rounded-xl py-2 px-3 text-slate-900 font-mono font-bold focus:border-blue-500 focus:outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-gray-400 font-bold mb-1">Packaging Unit</label>
+              <label className="block text-slate-600 font-bold mb-1">Packaging Unit</label>
               <input
                 type="text"
                 value={unit}
                 onChange={(e) => setUnit(e.target.value)}
-                className="w-full bg-gray-950 border border-gray-800 rounded-xl py-2 px-3 text-white focus:border-blue-500 focus:outline-none"
+                className="w-full bg-white border border-slate-200 rounded-xl py-2 px-3 text-slate-900 focus:border-blue-500 focus:outline-none"
                 placeholder="boxes / kg / bags"
               />
             </div>
 
             <div>
-              <label className="block text-gray-400 font-bold mb-1">Gross Weight (KG)</label>
+              <label className="block text-slate-600 font-bold mb-1">Gross Weight (KG)</label>
               <input
                 type="number"
                 value={weightKg}
                 onChange={(e) => setWeightKg(Math.max(1, parseInt(e.target.value) || 1))}
-                className="w-full bg-gray-950 border border-gray-800 rounded-xl py-2 px-3 text-white font-mono font-bold focus:border-blue-500 focus:outline-none"
+                className="w-full bg-white border border-slate-200 rounded-xl py-2 px-3 text-slate-900 font-mono font-bold focus:border-blue-500 focus:outline-none"
               />
             </div>
           </div>
         </div>
 
         {/* Section 4: Origin & Destination */}
-        <div className="bg-gray-900/90 border border-gray-800 rounded-3xl p-5 shadow-2xl space-y-4">
-          <div className="text-xs font-black text-gray-300 uppercase tracking-wider flex items-center gap-2">
-            <MapPin className="w-4 h-4 text-emerald-400" />
+        <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-xs space-y-4">
+          <div className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
+            <MapPin className="w-4 h-4 text-emerald-600" />
             <span>Route Origin &amp; Destination Corridors</span>
           </div>
 
           {/* Origin Picker */}
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs">
-              <label className="text-gray-300 font-bold">1. Pickup / Origin Point</label>
+              <label className="text-slate-700 font-bold">1. Pickup / Origin Point</label>
               <button
                 type="button"
                 onClick={handleUseCurrentGpsOrigin}
-                className="text-[11px] text-emerald-400 hover:text-emerald-300 flex items-center gap-1 font-bold"
+                className="text-[11px] text-emerald-600 hover:text-emerald-700 flex items-center gap-1 font-bold"
               >
                 <LocateFixed className="w-3.5 h-3.5" />
                 <span>Use Live GPS Location</span>
@@ -372,11 +372,11 @@ export const DriverNewConsignmentView: React.FC<DriverNewConsignmentViewProps> =
                 onClick={handleUseCurrentGpsOrigin}
                 className={`p-3 rounded-xl border text-left text-xs transition flex items-center gap-2.5 ${
                   originType === 'GPS'
-                    ? 'bg-emerald-950/60 border-emerald-500 text-emerald-200'
-                    : 'bg-gray-950/70 border-gray-800 text-gray-400 hover:bg-gray-900'
+                    ? 'bg-emerald-50 border-emerald-500 text-emerald-900 ring-1 ring-emerald-500 shadow-xs'
+                    : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
                 }`}
               >
-                <LocateFixed className="w-4 h-4 text-emerald-400 shrink-0" />
+                <LocateFixed className="w-4 h-4 text-emerald-600 shrink-0" />
                 <div className="truncate">
                   <span className="font-bold block">Current GPS Position</span>
                   <span className="text-[10px] font-mono opacity-80">
@@ -387,7 +387,7 @@ export const DriverNewConsignmentView: React.FC<DriverNewConsignmentViewProps> =
 
               <select
                 onChange={(e) => handleSelectOriginHub(parseInt(e.target.value))}
-                className="bg-gray-950 border border-gray-800 rounded-xl p-3 text-xs text-white font-bold focus:border-blue-500 focus:outline-none"
+                className="bg-white border border-slate-200 rounded-xl p-3 text-xs text-slate-900 font-bold focus:border-blue-500 focus:outline-none"
               >
                 <option value="">Or Select NER Hub Origin...</option>
                 {NER_HUBS.map((hub, idx) => (
@@ -398,19 +398,19 @@ export const DriverNewConsignmentView: React.FC<DriverNewConsignmentViewProps> =
               </select>
             </div>
 
-            <div className="p-2.5 rounded-xl bg-gray-950/60 border border-gray-800 text-[11px] font-mono text-gray-400 flex items-center justify-between">
-              <span>Selected Origin: <strong className="text-white">{originName}</strong></span>
+            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-[11px] font-mono text-slate-600 flex items-center justify-between">
+              <span>Selected Origin: <strong className="text-slate-900">{originName}</strong></span>
               <span>({originLat.toFixed(3)}, {originLon.toFixed(3)})</span>
             </div>
           </div>
 
           {/* Destination Picker */}
-          <div className="space-y-2 pt-3 border-t border-gray-800">
-            <label className="block text-gray-300 font-bold text-xs">2. Delivery Destination</label>
+          <div className="space-y-2 pt-3 border-t border-slate-200">
+            <label className="block text-slate-700 font-bold text-xs">2. Delivery Destination</label>
             <select
               value={destHubIndex}
               onChange={(e) => handleSelectDestHub(parseInt(e.target.value))}
-              className="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-xs text-white font-bold focus:border-blue-500 focus:outline-none"
+              className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs text-slate-900 font-bold focus:border-blue-500 focus:outline-none"
             >
               {NER_HUBS.map((hub, idx) => (
                 <option key={hub.name} value={idx}>
@@ -419,24 +419,24 @@ export const DriverNewConsignmentView: React.FC<DriverNewConsignmentViewProps> =
               ))}
             </select>
 
-            <div className="p-2.5 rounded-xl bg-gray-950/60 border border-gray-800 text-[11px] font-mono text-gray-400 flex items-center justify-between">
-              <span>Selected Destination: <strong className="text-white">{destName}</strong></span>
+            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-[11px] font-mono text-slate-600 flex items-center justify-between">
+              <span>Selected Destination: <strong className="text-slate-900">{destName}</strong></span>
               <span>({destLat.toFixed(3)}, {destLon.toFixed(3)})</span>
             </div>
           </div>
         </div>
 
         {/* Section 5: Handling Instructions */}
-        <div className="bg-gray-900/90 border border-gray-800 rounded-3xl p-5 shadow-2xl space-y-2">
-          <label className="block text-xs font-black text-gray-300 uppercase tracking-wider flex items-center gap-2">
-            <FileText className="w-4 h-4 text-blue-400" />
+        <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-xs space-y-2">
+          <label className="block text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
+            <FileText className="w-4 h-4 text-blue-600" />
             <span>Driver Notes / Special Handling Instructions</span>
           </label>
           <textarea
             rows={2}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            className="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-xs text-white focus:border-blue-500 focus:outline-none"
+            className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs text-slate-900 focus:border-blue-500 focus:outline-none"
             placeholder="Special convoy or off-road clearance notes..."
           />
         </div>
@@ -446,7 +446,7 @@ export const DriverNewConsignmentView: React.FC<DriverNewConsignmentViewProps> =
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500 hover:from-blue-500 hover:to-indigo-500 text-white font-black text-sm uppercase tracking-wider shadow-2xl shadow-blue-500/40 transition active:scale-98 flex items-center justify-center gap-3 disabled:opacity-50"
+            className="w-full py-4 px-6 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-black text-sm uppercase tracking-wider shadow-xs transition active:scale-98 flex items-center justify-center gap-3 disabled:opacity-50"
           >
             {isSubmitting ? (
               <>

@@ -12,6 +12,9 @@ import { FieldOfficerApp } from './components/field-officer/FieldOfficerApp';
 import { DriverApp } from './components/driver/DriverApp';
 import { RoleSelectorModal } from './components/RoleSelectorModal';
 import { AlertBanner } from './components/AlertBanner';
+import { AssamWeatherView } from './components/weather/AssamWeatherView';
+import { AllIncidentsView } from './components/incident/AllIncidentsView';
+import { AllFleetView } from './components/fleet/AllFleetView';
 import { 
   fetchRiskSummary, 
   fetchRiskMap, 
@@ -31,7 +34,7 @@ import type { RiskSummary, RiskGeoJSON, RoadRiskProperties } from './types/risk'
 import type { RoutePlanResponse } from './types/route';
 import type { Incident, IncidentCreateRequest } from './types/incident';
 import type { Vehicle, Delivery, LogisticsAlert } from './types/logistics';
-import { AlertCircle, RefreshCw, Compass, AlertTriangle, Smartphone, Users } from 'lucide-react';
+import { AlertCircle, RefreshCw, Compass, AlertTriangle, Smartphone, Users, CloudRain } from 'lucide-react';
 
 
 export function App() {
@@ -81,13 +84,38 @@ export function App() {
   const [isFieldOfficerModalOpen, setIsFieldOfficerModalOpen] = useState<boolean>(false);
   const [pendingOfflineCount, setPendingOfflineCount] = useState<number>(0);
 
+  const [isWeatherRoute, setIsWeatherRoute] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return window.location.hash.includes('weather');
+    }
+    return false;
+  });
+
+  const [isIncidentsRoute, setIsIncidentsRoute] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return window.location.hash.includes('incident');
+    }
+    return false;
+  });
+
+  const [isFleetRoute, setIsFleetRoute] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return window.location.hash.includes('fleet') || window.location.hash.includes('logistics');
+    }
+    return false;
+  });
+
   useEffect(() => {
     const handleHashChange = () => {
-      if (window.location.hash.includes('driver')) {
+      const hash = window.location.hash;
+      setIsWeatherRoute(hash.includes('weather'));
+      setIsIncidentsRoute(hash.includes('incident'));
+      setIsFleetRoute(hash.includes('fleet') || hash.includes('logistics'));
+      if (hash.includes('driver')) {
         setActiveRole('driver');
-      } else if (window.location.hash.includes('field')) {
+      } else if (hash.includes('field')) {
         setActiveRole('field_officer');
-      } else if (window.location.hash.includes('admin')) {
+      } else if (hash.includes('admin') || hash.includes('weather') || hash.includes('incident') || hash.includes('fleet') || hash.includes('logistics') || hash === '') {
         setActiveRole('admin');
       }
     };
@@ -389,8 +417,54 @@ export function App() {
     );
   }
 
+  // Render Dedicated Assam Weather Intelligence View if #weather
+  if (isWeatherRoute && activeRole === 'admin') {
+    return (
+      <AssamWeatherView
+        onBackToDashboard={() => {
+          setIsWeatherRoute(false);
+          window.location.hash = '#admin';
+        }}
+      />
+    );
+  }
+
+  // Render Dedicated All Incidents View if #incidents
+  if (isIncidentsRoute && activeRole === 'admin') {
+    return (
+      <AllIncidentsView
+        onBackToDashboard={() => {
+          setIsIncidentsRoute(false);
+          window.location.hash = '#admin';
+        }}
+        onFocusIncidentOnMap={(inc) => {
+          setIsIncidentsRoute(false);
+          window.location.hash = '#admin';
+          handleSelectIncidentOnMap(inc);
+        }}
+      />
+    );
+  }
+
+  // Render Dedicated Freight Fleet & Logistics View if #fleet
+  if (isFleetRoute && activeRole === 'admin') {
+    return (
+      <AllFleetView
+        onBackToDashboard={() => {
+          setIsFleetRoute(false);
+          window.location.hash = '#admin';
+        }}
+        onFocusVehicleOnMap={(veh) => {
+          setIsFleetRoute(false);
+          window.location.hash = '#admin';
+          handleFocusVehicleOnMap(veh);
+        }}
+      />
+    );
+  }
+
   return (
-    <div className="flex flex-col min-h-screen w-full bg-gray-950 text-gray-100 font-sans">
+    <div className="flex flex-col h-screen w-full bg-slate-50 text-slate-900 font-sans overflow-hidden">
       <Header
         scenarioName={summary?.active_monsoon_scenario || 'Assam Monsoon 2022'}
         onRefresh={() => loadData(selectedFilter)}
@@ -415,6 +489,11 @@ export function App() {
           window.location.hash = '#driver';
         }}
         pendingOfflineCount={pendingOfflineCount}
+        onOpenWeather={() => {
+          setIsWeatherRoute(true);
+          window.location.hash = '#weather';
+        }}
+        isWeatherActive={isWeatherRoute}
       />
 
 
@@ -433,26 +512,26 @@ export function App() {
         onOpenAlertDetails={handleOpenAlertDetails}
       />
 
-      <div className="relative flex-1 w-full min-h-[520px] h-[calc(100vh-180px)] overflow-hidden">
+      <div className="relative flex-1 min-h-0 w-full overflow-hidden">
         {isLoading && (
-          <div className="absolute inset-0 z-[2000] bg-gray-950/70 backdrop-blur-sm flex flex-col items-center justify-center gap-3">
-            <RefreshCw className="w-8 h-8 text-blue-400 animate-spin" />
-            <p className="text-sm font-medium text-gray-300">
+          <div className="absolute inset-0 z-[2000] bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center gap-3">
+            <RefreshCw className="w-8 h-8 text-blue-600 animate-spin" />
+            <p className="text-sm font-medium text-slate-700">
               Loading 13,093 Assam Road Disruption Risk Vectors...
             </p>
           </div>
         )}
 
         {error && (
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[2000] bg-red-950/90 border border-red-800 text-red-200 px-4 py-3 rounded-lg shadow-2xl flex items-center gap-3 text-xs max-w-lg">
-            <AlertCircle className="w-5 h-5 text-red-400 shrink-0" />
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[2000] bg-red-50 border border-red-200 text-red-900 px-4 py-3 rounded-lg shadow-xl flex items-center gap-3 text-xs max-w-lg">
+            <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
             <div className="flex-1">
-              <p className="font-semibold text-red-300">Connection Failed</p>
-              <p className="text-red-400">{error}</p>
+              <p className="font-semibold text-red-900">Connection Failed</p>
+              <p className="text-red-700">{error}</p>
             </div>
             <button
               onClick={() => loadData(selectedFilter)}
-              className="px-2.5 py-1 bg-red-900 hover:bg-red-800 text-white rounded border border-red-700 transition"
+              className="px-2.5 py-1 bg-red-600 hover:bg-red-700 text-white rounded font-medium transition"
             >
               Retry
             </button>
@@ -492,31 +571,43 @@ export function App() {
                 }
               />
               
-              <div className="grid grid-cols-3 gap-1.5">
+              <div className="grid grid-cols-4 gap-1.5">
                 {/* Route Planner Button */}
                 <button
                   onClick={() => setIsRoutePlannerOpen(true)}
-                  className="flex items-center justify-center gap-1 py-2 px-1.5 bg-gray-900/90 hover:bg-gray-800 backdrop-blur-md border border-gray-700 text-white font-semibold rounded-lg shadow-xl text-[11px] transition group"
+                  className="flex items-center justify-center gap-1 py-2 px-1.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-semibold rounded-lg shadow-sm text-[11px] transition group"
                 >
-                  <Compass className="w-3.5 h-3.5 text-blue-400 group-hover:rotate-45 transition-transform" />
+                  <Compass className="w-3.5 h-3.5 text-blue-600 group-hover:rotate-45 transition-transform" />
                   <span>Route</span>
                 </button>
 
                 {/* Incident Queue Button */}
                 <button
                   onClick={() => setIsIncidentPanelOpen(true)}
-                  className="flex items-center justify-center gap-1 py-2 px-1.5 bg-amber-950/80 hover:bg-amber-900/80 backdrop-blur-md border border-amber-800/80 text-amber-200 font-semibold rounded-lg shadow-xl text-[11px] transition"
+                  className="flex items-center justify-center gap-1 py-2 px-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 font-semibold rounded-lg shadow-sm text-[11px] transition"
                 >
-                  <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
+                  <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
                   <span>Queue ({unverifiedCount})</span>
+                </button>
+
+                {/* Weather Button */}
+                <button
+                  onClick={() => {
+                    setIsWeatherRoute(true);
+                    window.location.hash = '#weather';
+                  }}
+                  className="flex items-center justify-center gap-1 py-2 px-1.5 bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-900 font-semibold rounded-lg shadow-sm text-[11px] transition"
+                >
+                  <CloudRain className="w-3.5 h-3.5 text-blue-600" />
+                  <span>Weather</span>
                 </button>
 
                 {/* Field App Launcher */}
                 <button
                   onClick={() => setIsFieldOfficerModalOpen(true)}
-                  className="flex items-center justify-center gap-1 py-2 px-1.5 bg-cyan-950/80 hover:bg-cyan-900/80 backdrop-blur-md border border-cyan-800/80 text-cyan-200 font-semibold rounded-lg shadow-xl text-[11px] transition"
+                  className="flex items-center justify-center gap-1 py-2 px-1.5 bg-sky-50 hover:bg-sky-100 border border-sky-200 text-sky-900 font-semibold rounded-lg shadow-sm text-[11px] transition"
                 >
-                  <Smartphone className="w-3.5 h-3.5 text-cyan-400" />
+                  <Smartphone className="w-3.5 h-3.5 text-sky-600" />
                   <span>Field App</span>
                 </button>
               </div>
@@ -548,6 +639,11 @@ export function App() {
           onSelectIncidentOnMap={handleSelectIncidentOnMap}
           selectedIncidentId={selectedIncidentId}
           isLoading={isIncidentLoading}
+          onOpenAllIncidents={() => {
+            setIsIncidentPanelOpen(false);
+            setIsIncidentsRoute(true);
+            window.location.hash = '#incidents';
+          }}
         />
 
         {/* Fleet & Logistics Impact Drawer */}
@@ -561,6 +657,11 @@ export function App() {
           onFocusVehicleOnMap={handleFocusVehicleOnMap}
           selectedVehicleId={selectedVehicleId}
           activeRouteResponse={activeRouteResponse}
+          onOpenAllFleet={() => {
+            setIsFleetDrawerOpen(false);
+            setIsFleetRoute(true);
+            window.location.hash = '#fleet';
+          }}
         />
 
         {/* Field Officer Offline Reporting Modal */}
@@ -591,9 +692,9 @@ export function App() {
           <button
             type="button"
             onClick={() => setIsRoleModalOpen(true)}
-            className="flex items-center gap-2 px-3.5 py-2.5 rounded-2xl bg-gray-900/90 hover:bg-gray-800 text-white font-bold text-xs border border-blue-500/50 shadow-2xl backdrop-blur-md transition group active:scale-95"
+            className="flex items-center gap-2 px-3.5 py-2.5 rounded-2xl bg-white hover:bg-slate-50 text-slate-800 font-bold text-xs border border-slate-200 shadow-lg transition group active:scale-95"
           >
-            <Users className="w-4 h-4 text-blue-400 group-hover:scale-110 transition-transform" />
+            <Users className="w-4 h-4 text-blue-600 group-hover:scale-110 transition-transform" />
             <span>Switch Role / Portal</span>
           </button>
         </div>

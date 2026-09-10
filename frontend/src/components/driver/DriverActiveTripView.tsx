@@ -17,12 +17,14 @@ import {
   Pause, 
   RefreshCw, 
   Flag,
-  Sparkles
+  Sparkles,
+  CloudRain
 } from 'lucide-react';
 import type { Delivery } from '../../types/logistics';
 import type { RouteSummary } from '../../types/route';
 import type { DriverProfile, DriverGPS } from '../../types/driver';
-import { planRoute, updateDeliveryDetails } from '../../services/api';
+import { planRoute, updateDeliveryDetails, fetchWeatherAtCoords } from '../../services/api';
+import type { DistrictWeatherReport } from '../../types/weather';
 
 interface DriverActiveTripViewProps {
   delivery: Delivery;
@@ -105,6 +107,23 @@ export const DriverActiveTripView: React.FC<DriverActiveTripViewProps> = ({
     delivery.origin_coords.lat,
     delivery.origin_coords.lon,
   ];
+
+  // GPS-Traced Weather for current truck location
+  const [tracedWeather, setTracedWeather] = useState<DistrictWeatherReport | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    if (currentPos && currentPos[0] && currentPos[1]) {
+      fetchWeatherAtCoords(currentPos[0], currentPos[1])
+        .then((data) => {
+          if (isMounted) setTracedWeather(data);
+        })
+        .catch((err) => console.warn('Active trip weather lookup failed:', err));
+    }
+    return () => {
+      isMounted = false;
+    };
+  }, [currentPos[0], currentPos[1]]);
 
   // Simulation timer
   useEffect(() => {
@@ -213,48 +232,48 @@ export const DriverActiveTripView: React.FC<DriverActiveTripViewProps> = ({
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto space-y-4 p-4 sm:p-6 text-gray-100 font-sans pb-28">
+    <div className="w-full max-w-5xl mx-auto space-y-4 p-4 sm:p-6 text-slate-800 font-sans pb-28">
       {/* Dynamic Road Closure & Detour Warning Banner */}
       {hasRoadClosureAhead && (
-        <div className="bg-red-950/90 border-2 border-red-600 rounded-3xl p-5 shadow-[0_0_30px_rgba(220,38,38,0.5)] animate-in slide-in-from-top duration-200 space-y-3">
+        <div className="bg-rose-50 border border-rose-200 rounded-3xl p-5 shadow-xs animate-in slide-in-from-top duration-200 space-y-3">
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-red-600 text-white flex items-center justify-center animate-bounce">
+              <div className="w-10 h-10 rounded-2xl bg-rose-600 text-white flex items-center justify-center animate-bounce">
                 <AlertOctagon className="w-6 h-6" />
               </div>
               <div>
-                <span className="px-2.5 py-0.5 rounded-full bg-red-600 text-white text-[10px] font-black uppercase tracking-wider">
+                <span className="px-2.5 py-0.5 rounded-full bg-rose-600 text-white text-[10px] font-bold uppercase tracking-wider">
                   TACTICAL WARNING • ROAD CLOSED AHEAD
                 </span>
-                <h3 className="text-base sm:text-lg font-black text-white uppercase mt-0.5">
+                <h3 className="text-base sm:text-lg font-black text-rose-900 uppercase mt-0.5">
                   Fresh Landslide &amp; Debris Obstruction on Corridor
                 </h3>
-                <p className="text-xs text-red-200">
+                <p className="text-xs text-rose-700">
                   Control Tower verified road blockage at km 84. Autonomous NetworkX detour calculated.
                 </p>
               </div>
             </div>
 
-            <span className="text-xs font-mono font-bold text-red-300">
+            <span className="text-xs font-mono font-bold text-rose-700">
               12.4 KM AHEAD
             </span>
           </div>
 
           {detourRoute ? (
-            <div className="bg-gray-900/90 border border-gray-800 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="bg-white border border-rose-200 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xs">
               <div className="space-y-1 text-xs">
                 <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-emerald-400" />
-                  <span className="font-bold text-white uppercase">
+                  <Sparkles className="w-4 h-4 text-emerald-600" />
+                  <span className="font-bold text-slate-900 uppercase">
                     Safe Detour Via Elevated Bypass
                   </span>
                 </div>
-                <div className="text-[11px] text-gray-300 flex items-center gap-3 font-mono">
+                <div className="text-[11px] text-slate-600 flex items-center gap-3 font-mono">
                   <span>Dist: +{(detourRoute.distance_km - remainingDistanceKm).toFixed(1)} km</span>
                   <span>•</span>
                   <span>Est: +{Math.max(5, Math.round(detourRoute.eta_minutes - remainingMinutes))} mins</span>
                   <span>•</span>
-                  <span className="text-emerald-400 font-bold">0 High-Risk Segments</span>
+                  <span className="text-emerald-700 font-bold">0 High-Risk Segments</span>
                 </div>
               </div>
 
@@ -262,7 +281,7 @@ export const DriverActiveTripView: React.FC<DriverActiveTripViewProps> = ({
                 <button
                   type="button"
                   onClick={handleAcceptDetour}
-                  className="flex-1 sm:flex-none py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase shadow-lg shadow-emerald-600/30 transition flex items-center justify-center gap-1.5"
+                  className="flex-1 sm:flex-none py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs uppercase shadow-xs transition flex items-center justify-center gap-1.5"
                 >
                   <CheckCircle2 className="w-4 h-4" />
                   <span>ACCEPT NEW SAFE DETOUR</span>
@@ -270,8 +289,8 @@ export const DriverActiveTripView: React.FC<DriverActiveTripViewProps> = ({
               </div>
             </div>
           ) : isCalculatingDetour ? (
-            <div className="p-3 bg-gray-900 rounded-2xl text-xs text-gray-300 flex items-center gap-2">
-              <RefreshCw className="w-4 h-4 animate-spin text-blue-400" />
+            <div className="p-3 bg-white border border-rose-200 rounded-2xl text-xs text-slate-700 flex items-center gap-2">
+              <RefreshCw className="w-4 h-4 animate-spin text-blue-600" />
               <span>NetworkX Dijkstra Engine computing safe alternate bypass...</span>
             </div>
           ) : null}
@@ -279,31 +298,31 @@ export const DriverActiveTripView: React.FC<DriverActiveTripViewProps> = ({
       )}
 
       {/* Top HUD: Driver Flight Deck */}
-      <div className="bg-gray-900/95 border border-gray-800 rounded-3xl p-5 shadow-2xl space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-gray-800">
+      <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-blue-600/20 border border-blue-500/40 text-blue-400 flex items-center justify-center font-black">
+            <div className="w-11 h-11 rounded-2xl bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center font-bold">
               🚚
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-black text-white uppercase tracking-wide">
+                <span className="text-xs font-black text-slate-900 uppercase tracking-wide">
                   {delivery.consignment_id || delivery.id}
                 </span>
-                <span className="px-2 py-0.5 rounded-full bg-blue-900/50 text-blue-300 text-[10px] font-mono font-bold">
+                <span className="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-mono font-bold">
                   {delivery.priority}
                 </span>
                 <span
                   className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase ${
                     statusState === 'ARRIVED'
-                      ? 'bg-emerald-900/80 text-emerald-300 animate-pulse'
-                      : 'bg-indigo-900/80 text-indigo-300 animate-pulse'
+                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 animate-pulse'
+                      : 'bg-indigo-50 text-indigo-700 border border-indigo-200 animate-pulse'
                   }`}
                 >
                   ● {statusState}
                 </span>
               </div>
-              <p className="text-xs text-gray-400 mt-0.5">
+              <p className="text-xs text-slate-500 mt-0.5">
                 {delivery.cargo_name} • Driver {driver.name} ({driver.vehicle_number})
               </p>
             </div>
@@ -316,8 +335,8 @@ export const DriverActiveTripView: React.FC<DriverActiveTripViewProps> = ({
               onClick={() => setIsSimulatingGps((prev) => !prev)}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition ${
                 isSimulatingGps
-                  ? 'bg-blue-600 text-white border-blue-500 shadow-lg shadow-blue-600/30'
-                  : 'bg-gray-800 text-gray-300 border-gray-700 hover:text-white'
+                  ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
+                  : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
               }`}
             >
               {isSimulatingGps ? (
@@ -337,9 +356,9 @@ export const DriverActiveTripView: React.FC<DriverActiveTripViewProps> = ({
               <button
                 type="button"
                 onClick={handleSimulateClosure}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-950/80 hover:bg-red-900 border border-red-700/80 text-red-300 text-xs font-bold transition"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 text-xs font-bold transition shadow-xs"
               >
-                <AlertTriangle className="w-3.5 h-3.5 text-red-400" />
+                <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
                 <span>Simulate Blockage</span>
               </button>
             )}
@@ -349,44 +368,44 @@ export const DriverActiveTripView: React.FC<DriverActiveTripViewProps> = ({
         {/* Telemetry Gauges Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {/* Speed */}
-          <div className="p-3.5 rounded-2xl bg-gray-950 border border-gray-800/80">
-            <span className="text-[11px] text-gray-400 font-bold block mb-1">SPEED</span>
-            <div className="text-2xl font-black text-white font-mono flex items-baseline gap-1">
+          <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80">
+            <span className="text-[11px] text-slate-500 font-bold block mb-1">SPEED</span>
+            <div className="text-2xl font-black text-slate-900 font-mono flex items-baseline gap-1">
               <span>{currentSpeed}</span>
-              <span className="text-xs text-gray-400 font-sans">KM/H</span>
+              <span className="text-xs text-slate-500 font-sans">KM/H</span>
             </div>
           </div>
 
           {/* Distance Remaining */}
-          <div className="p-3.5 rounded-2xl bg-gray-950 border border-gray-800/80">
-            <span className="text-[11px] text-gray-400 font-bold block mb-1">REMAINING DIST</span>
-            <div className="text-2xl font-black text-blue-400 font-mono flex items-baseline gap-1">
+          <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80">
+            <span className="text-[11px] text-slate-500 font-bold block mb-1">REMAINING DIST</span>
+            <div className="text-2xl font-black text-blue-600 font-mono flex items-baseline gap-1">
               <span>{remainingDistanceKm.toFixed(1)}</span>
-              <span className="text-xs text-gray-400 font-sans">KM</span>
+              <span className="text-xs text-slate-500 font-sans">KM</span>
             </div>
           </div>
 
           {/* Dynamic ETA */}
-          <div className="p-3.5 rounded-2xl bg-gray-950 border border-gray-800/80">
-            <span className="text-[11px] text-gray-400 font-bold block mb-1">EST. ARRIVAL</span>
-            <div className="text-2xl font-black text-amber-400 font-mono">
+          <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80">
+            <span className="text-[11px] text-slate-500 font-bold block mb-1">EST. ARRIVAL</span>
+            <div className="text-2xl font-black text-amber-600 font-mono">
               {Math.floor(remainingMinutes / 60)}h {remainingMinutes % 60}m
             </div>
           </div>
 
           {/* Destination */}
-          <div className="p-3.5 rounded-2xl bg-gray-950 border border-gray-800/80 truncate">
-            <span className="text-[11px] text-gray-400 font-bold block mb-1">DESTINATION</span>
-            <div className="text-sm font-black text-white truncate font-sans">
+          <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 truncate">
+            <span className="text-[11px] text-slate-500 font-bold block mb-1">DESTINATION</span>
+            <div className="text-sm font-black text-slate-900 truncate font-sans">
               {delivery.destination}
             </div>
-            <span className="text-[10px] text-emerald-400 font-bold">All-weather route</span>
+            <span className="text-[10px] text-emerald-700 font-bold">All-weather route</span>
           </div>
         </div>
       </div>
 
       {/* Interactive In-Transit Live Map */}
-      <div className="bg-gray-900 border border-gray-800 rounded-3xl overflow-hidden shadow-2xl relative h-[420px] sm:h-[480px]">
+      <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-xs relative h-[420px] sm:h-[480px]">
         <MapContainer
           center={currentPos}
           zoom={11}
@@ -402,7 +421,7 @@ export const DriverActiveTripView: React.FC<DriverActiveTripViewProps> = ({
           <Polyline
             positions={coordinates}
             pathOptions={{
-              color: '#3b82f6',
+              color: '#2563eb',
               weight: 6,
               opacity: 0.9,
             }}
@@ -434,20 +453,36 @@ export const DriverActiveTripView: React.FC<DriverActiveTripViewProps> = ({
           <MapCenterFollow coords={currentPos} />
         </MapContainer>
 
-        {/* Floating Proximity Road Warning Badge */}
-        <div className="absolute top-4 left-4 z-[1000] bg-gray-950/85 backdrop-blur-md border border-gray-800 rounded-2xl p-3 shadow-xl max-w-xs space-y-1">
-          <div className="flex items-center gap-2 text-amber-400 text-xs font-bold">
-            <AlertTriangle className="w-4 h-4" />
-            <span>TERRAIN SAFETY HUD</span>
+        {/* Floating Proximity Road Warning Badge (Live Traced Weather) */}
+        <div className="absolute top-4 left-4 z-[1000] bg-white/95 backdrop-blur-md border border-slate-200 rounded-2xl p-3 shadow-sm max-w-xs space-y-1">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-1.5 text-blue-700 text-xs font-bold">
+              <CloudRain className="w-4 h-4 text-blue-600" />
+              <span>{tracedWeather ? `${tracedWeather.district_name} Weather` : 'TERRAIN SAFETY HUD'}</span>
+            </div>
+            {tracedWeather && (
+              <span
+                className={`px-1.5 py-0.2 rounded text-[9px] font-bold border ${
+                  tracedWeather.flood_alert_level === 'RED'
+                    ? 'bg-red-50 text-red-700 border-red-200'
+                    : tracedWeather.flood_alert_level === 'ORANGE'
+                    ? 'bg-amber-50 text-amber-700 border-amber-200'
+                    : 'bg-blue-50 text-blue-700 border-blue-200'
+                }`}
+              >
+                {tracedWeather.rainfall_mm}mm rain
+              </span>
+            )}
           </div>
-          <p className="text-[11px] text-gray-300">
-            Passing Barak Valley foothills. Heavy monsoon advisory active. Safe speed recommended &lt; 50 km/h.
+          <p className="text-[11px] text-slate-600 leading-relaxed">
+            {tracedWeather?.logistics_advisory ||
+              'Passing Barak Valley foothills. Heavy monsoon advisory active. Safe speed recommended < 50 km/h.'}
           </p>
         </div>
 
         {/* Live GPS Coordinates Pill */}
-        <div className="absolute bottom-4 left-4 z-[1000] bg-gray-950/90 backdrop-blur-md border border-gray-800 rounded-xl px-3 py-1.5 text-[11px] font-mono text-gray-300 shadow-xl flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+        <div className="absolute bottom-4 left-4 z-[1000] bg-white/95 backdrop-blur-md border border-slate-200 rounded-xl px-3 py-1.5 text-[11px] font-mono text-slate-700 shadow-xs flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
           <span>{currentPos[0].toFixed(4)}° N, {currentPos[1].toFixed(4)}° E</span>
         </div>
       </div>
@@ -459,7 +494,7 @@ export const DriverActiveTripView: React.FC<DriverActiveTripViewProps> = ({
           type="button"
           onClick={handleMarkArrived}
           disabled={statusState === 'ARRIVED' || statusState === 'COMPLETED'}
-          className="p-3.5 rounded-2xl bg-gray-900 hover:bg-gray-800 border border-gray-800 hover:border-emerald-500/50 text-emerald-400 font-black text-xs uppercase transition active:scale-95 flex flex-col items-center justify-center gap-1.5 disabled:opacity-50"
+          className="p-3.5 rounded-2xl bg-white hover:bg-slate-50 border border-slate-200 text-emerald-700 font-bold text-xs uppercase transition active:scale-95 flex flex-col items-center justify-center gap-1.5 shadow-xs disabled:opacity-50"
         >
           <Flag className="w-5 h-5" />
           <span>{statusState === 'ARRIVED' ? 'ARRIVED AT DEST' : 'MARK ARRIVED'}</span>
@@ -469,7 +504,7 @@ export const DriverActiveTripView: React.FC<DriverActiveTripViewProps> = ({
         <button
           type="button"
           onClick={handleCompleteDelivery}
-          className="p-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase shadow-xl shadow-emerald-600/30 transition active:scale-95 flex flex-col items-center justify-center gap-1.5"
+          className="p-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs uppercase shadow-xs transition active:scale-95 flex flex-col items-center justify-center gap-1.5"
         >
           <CheckCircle2 className="w-5 h-5" />
           <span>COMPLETE DELIVERY</span>
@@ -479,7 +514,7 @@ export const DriverActiveTripView: React.FC<DriverActiveTripViewProps> = ({
         <button
           type="button"
           onClick={onOpenReportModal}
-          className="p-3.5 rounded-2xl bg-amber-950/80 hover:bg-amber-900 border border-amber-800 text-amber-300 font-black text-xs uppercase transition active:scale-95 flex flex-col items-center justify-center gap-1.5"
+          className="p-3.5 rounded-2xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-800 font-bold text-xs uppercase transition active:scale-95 flex flex-col items-center justify-center gap-1.5 shadow-xs"
         >
           <AlertTriangle className="w-5 h-5" />
           <span>REPORT HAZARD</span>
@@ -489,7 +524,7 @@ export const DriverActiveTripView: React.FC<DriverActiveTripViewProps> = ({
         <button
           type="button"
           onClick={onOpenEmergencyModal}
-          className="p-3.5 rounded-2xl bg-red-600 hover:bg-red-500 text-white font-black text-xs uppercase shadow-xl shadow-red-600/30 transition active:scale-95 flex flex-col items-center justify-center gap-1.5"
+          className="p-3.5 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs uppercase shadow-xs transition active:scale-95 flex flex-col items-center justify-center gap-1.5"
         >
           <AlertOctagon className="w-5 h-5" />
           <span>EMERGENCY SOS</span>

@@ -100,11 +100,11 @@ export const FieldOfficerModal: React.FC<FieldOfficerModalProps> = ({
         onIncidentSynced();
       }
     } catch (err: any) {
-      console.error('Submission error:', err);
-      // Fallback to IndexedDB if network fails
+      console.error('Failed to submit report:', err);
+      // Fallback save to IndexedDB on failure
       await saveOfflineReport(reportData);
       await loadPending();
-      setSubmitSuccessMsg('Network error: Stored safely in IndexedDB (Pending Sync).');
+      setSubmitSuccessMsg('Network error: Auto-saved to IndexedDB offline queue.');
     } finally {
       setIsSubmitting(false);
       setTimeout(() => setSubmitSuccessMsg(null), 5000);
@@ -113,20 +113,12 @@ export const FieldOfficerModal: React.FC<FieldOfficerModalProps> = ({
 
   const handleSyncAll = async () => {
     if (pendingReports.length === 0) return;
-
     setIsSyncing(true);
-    try {
-      const payload: IncidentCreateRequest[] = pendingReports.map((p) => ({
-        type: p.type,
-        road_name: p.road_name,
-        description: p.description,
-        source: 'OFFICER',
-        severity: p.severity,
-        latitude: p.latitude,
-        longitude: p.longitude,
-        photo_url: p.photo_url,
-      }));
 
+    try {
+      const payload: IncidentCreateRequest[] = pendingReports.map(
+        ({ local_id, created_at, sync_status, photo_data_url, ...req }) => req
+      );
       const res = await syncOfflineIncidents(payload);
       if (res.success) {
         const localIds = pendingReports.map((p) => p.local_id);
@@ -145,13 +137,13 @@ export const FieldOfficerModal: React.FC<FieldOfficerModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-[3000] bg-gray-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-gray-900 border border-gray-800 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden text-gray-200 animate-in fade-in zoom-in-95 duration-150 flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-[3000] bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+      <div className="bg-white border border-slate-200 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden text-slate-800 animate-in fade-in zoom-in-95 duration-150 flex flex-col max-h-[90vh]">
         {/* Device Simulation Top Header */}
-        <div className="bg-gray-950 px-4 py-2 border-b border-gray-800 flex items-center justify-between text-xs">
+        <div className="bg-slate-50/70 px-4 py-2.5 border-b border-slate-100 flex items-center justify-between text-xs">
           <div className="flex items-center gap-2">
-            <Smartphone className="w-3.5 h-3.5 text-blue-400" />
-            <span className="font-bold text-gray-300">ASDMA Field Officer Mobile Client</span>
+            <Smartphone className="w-3.5 h-3.5 text-blue-600" />
+            <span className="font-bold text-slate-800">ASDMA Field Officer Mobile Client</span>
           </div>
 
           <div className="flex items-center gap-3">
@@ -161,18 +153,18 @@ export const FieldOfficerModal: React.FC<FieldOfficerModalProps> = ({
               onClick={() => setIsSimulatedOffline(!isSimulatedOffline)}
               className={`flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold border transition ${
                 isSimulatedOffline
-                  ? 'bg-red-950/80 text-red-300 border-red-700'
-                  : 'bg-emerald-950/80 text-emerald-300 border-emerald-700'
+                  ? 'bg-rose-50 text-rose-700 border-rose-200'
+                  : 'bg-emerald-50 text-emerald-700 border-emerald-200'
               }`}
             >
               {isSimulatedOffline ? (
                 <>
-                  <WifiOff className="w-3 h-3 text-red-400 animate-pulse" />
+                  <WifiOff className="w-3 h-3 text-rose-600 animate-pulse" />
                   <span>SIMULATED OFFLINE</span>
                 </>
               ) : (
                 <>
-                  <Wifi className="w-3 h-3 text-emerald-400" />
+                  <Wifi className="w-3 h-3 text-emerald-600" />
                   <span>ONLINE</span>
                 </>
               )}
@@ -180,7 +172,7 @@ export const FieldOfficerModal: React.FC<FieldOfficerModalProps> = ({
 
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-white"
+              className="text-slate-400 hover:text-slate-700 p-1 rounded-md"
             >
               <X className="w-4 h-4" />
             </button>
@@ -188,20 +180,20 @@ export const FieldOfficerModal: React.FC<FieldOfficerModalProps> = ({
         </div>
 
         {/* Modal Body */}
-        <div className="p-4 space-y-3.5 overflow-y-auto text-xs">
+        <div className="p-4 space-y-3.5 overflow-y-auto text-xs pb-20">
           {/* Status Alert Banner */}
           {isSimulatedOffline ? (
-            <div className="p-2.5 bg-red-950/50 border border-red-800 rounded-lg flex items-center justify-between text-[11px] text-red-200">
+            <div className="p-2.5 bg-rose-50 border border-rose-200 rounded-xl flex items-center justify-between text-[11px] text-rose-900">
               <div className="flex items-center gap-2">
-                <Database className="w-4 h-4 text-red-400 shrink-0" />
+                <Database className="w-4 h-4 text-rose-600 shrink-0" />
                 <span>
                   <strong>Offline Mode Active:</strong> Cellular data severed. Reports will be cached locally in <strong>IndexedDB</strong>.
                 </span>
               </div>
             </div>
           ) : (
-            <div className="p-2.5 bg-emerald-950/40 border border-emerald-800 rounded-lg flex items-center gap-2 text-[11px] text-emerald-200">
-              <UploadCloud className="w-4 h-4 text-emerald-400 shrink-0" />
+            <div className="p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-2 text-[11px] text-emerald-900">
+              <UploadCloud className="w-4 h-4 text-emerald-600 shrink-0" />
               <span>
                 <strong>Connected:</strong> Direct encrypted satellite telemetry uplink active.
               </span>
@@ -211,13 +203,13 @@ export const FieldOfficerModal: React.FC<FieldOfficerModalProps> = ({
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-3">
             <div>
-              <label className="text-[10px] font-semibold text-gray-400 uppercase block mb-1">
+              <label className="text-[10px] font-semibold text-slate-500 uppercase block mb-1">
                 Hazard Classification
               </label>
               <select
                 value={incidentType}
                 onChange={(e) => setIncidentType(e.target.value)}
-                className="w-full bg-gray-950 border border-gray-700 rounded py-1.5 px-2.5 text-white"
+                className="w-full bg-white border border-slate-200 rounded-lg py-1.5 px-2.5 text-slate-800 focus:outline-none focus:border-blue-500 shadow-2xs"
               >
                 <option value="LANDSLIDE">Landslide / Mudflow Road Block</option>
                 <option value="FLOOD">Flash Flood Inundation</option>
@@ -229,16 +221,16 @@ export const FieldOfficerModal: React.FC<FieldOfficerModalProps> = ({
 
             <div>
               <div className="flex justify-between items-center mb-1">
-                <label className="text-[10px] font-semibold text-gray-400 uppercase">
+                <label className="text-[10px] font-semibold text-slate-500 uppercase">
                   Location / Corridor Segment
                 </label>
                 <button
                   type="button"
                   onClick={handleUseGPS}
-                  className="text-[10px] text-blue-400 hover:text-blue-300 flex items-center gap-1 font-semibold"
+                  className="text-[10px] text-blue-600 hover:text-blue-700 flex items-center gap-1 font-semibold"
                 >
                   <MapPin className="w-3 h-3" />
-                  <span>📍 Refresh GPS Pin</span>
+                  <span>Refresh GPS Pin</span>
                 </button>
               </div>
               <input
@@ -246,15 +238,15 @@ export const FieldOfficerModal: React.FC<FieldOfficerModalProps> = ({
                 required
                 value={roadName}
                 onChange={(e) => setRoadName(e.target.value)}
-                className="w-full bg-gray-950 border border-gray-700 rounded py-1.5 px-2.5 text-white"
+                className="w-full bg-white border border-slate-200 rounded-lg py-1.5 px-2.5 text-slate-800 focus:outline-none focus:border-blue-500 shadow-2xs"
               />
-              <div className="text-[10px] text-gray-500 mt-0.5">
+              <div className="text-[10px] text-slate-500 mt-0.5">
                 Current Device GPS: {lat.toFixed(4)} N, {lon.toFixed(4)} E (Accuracy ±4m)
               </div>
             </div>
 
             <div>
-              <label className="text-[10px] font-semibold text-gray-400 uppercase block mb-1">
+              <label className="text-[10px] font-semibold text-slate-500 uppercase block mb-1">
                 Field Observations / Passage Conditions
               </label>
               <textarea
@@ -262,13 +254,13 @@ export const FieldOfficerModal: React.FC<FieldOfficerModalProps> = ({
                 rows={2}
                 value={desc}
                 onChange={(e) => setDesc(e.target.value)}
-                className="w-full bg-gray-950 border border-gray-700 rounded py-1.5 px-2.5 text-white placeholder-gray-600"
+                className="w-full bg-white border border-slate-200 rounded-lg py-1.5 px-2.5 text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 shadow-2xs"
               />
             </div>
 
             {/* Severity Assessment */}
             <div>
-              <label className="text-[10px] font-semibold text-gray-400 uppercase block mb-1">
+              <label className="text-[10px] font-semibold text-slate-500 uppercase block mb-1">
                 Immediate Hazard Severity
               </label>
               <div className="grid grid-cols-3 gap-1">
@@ -277,12 +269,12 @@ export const FieldOfficerModal: React.FC<FieldOfficerModalProps> = ({
                     key={s}
                     type="button"
                     onClick={() => setSeverity(s)}
-                    className={`py-1 text-[10px] font-bold rounded border transition ${
+                    className={`py-1.5 text-[10px] font-bold rounded-lg border transition ${
                       severity === s
                         ? s === 'CRITICAL'
-                          ? 'bg-red-600 text-white border-red-500'
-                          : 'bg-amber-600 text-white border-amber-500'
-                        : 'bg-gray-950 text-gray-400 border-gray-800'
+                          ? 'bg-rose-50 text-rose-700 border-rose-300 shadow-2xs'
+                          : 'bg-amber-50 text-amber-800 border-amber-300 shadow-2xs'
+                        : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
                     }`}
                   >
                     {s}
@@ -292,17 +284,17 @@ export const FieldOfficerModal: React.FC<FieldOfficerModalProps> = ({
             </div>
 
             {/* Simulated Evidence Attachment */}
-            <div className="bg-gray-950/60 border border-gray-800 rounded p-2 flex items-center justify-between">
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-2.5 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Camera className="w-4 h-4 text-blue-400" />
-                <span className="text-[11px] text-gray-300">
+                <Camera className="w-4 h-4 text-blue-600" />
+                <span className="text-[11px] text-slate-700">
                   {hasPhoto ? 'Photo Attached (evidence_hill_slide.jpg)' : 'No Photo'}
                 </span>
               </div>
               <button
                 type="button"
                 onClick={() => setHasPhoto(!hasPhoto)}
-                className="text-[10px] text-blue-400 hover:text-blue-300 underline"
+                className="text-[10px] text-blue-600 hover:text-blue-700 font-semibold underline"
               >
                 {hasPhoto ? 'Remove' : 'Attach Photo'}
               </button>
@@ -312,10 +304,10 @@ export const FieldOfficerModal: React.FC<FieldOfficerModalProps> = ({
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`w-full py-2.5 font-bold rounded-lg shadow-lg flex items-center justify-center gap-2 transition text-xs text-white ${
+              className={`w-full py-2.5 font-bold rounded-xl shadow-xs flex items-center justify-center gap-2 transition text-xs text-white ${
                 isSimulatedOffline
-                  ? 'bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 shadow-amber-600/20'
-                  : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 shadow-blue-600/20'
+                  ? 'bg-amber-600 hover:bg-amber-700'
+                  : 'bg-blue-600 hover:bg-blue-700'
               }`}
             >
               {isSubmitting ? (
@@ -339,17 +331,17 @@ export const FieldOfficerModal: React.FC<FieldOfficerModalProps> = ({
 
           {/* Feedback Message */}
           {submitSuccessMsg && (
-            <div className="p-2.5 bg-gray-950 border border-emerald-700 text-emerald-300 rounded-lg text-center text-xs flex items-center justify-center gap-1.5 animate-in fade-in">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+            <div className="p-2.5 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-center text-xs flex items-center justify-center gap-1.5 animate-in fade-in font-medium">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
               <span>{submitSuccessMsg}</span>
             </div>
           )}
 
           {/* Offline Pending Sync Queue */}
-          <div className="pt-2 border-t border-gray-800 space-y-2">
+          <div className="pt-2 border-t border-slate-100 space-y-2">
             <div className="flex items-center justify-between text-[11px]">
-              <div className="flex items-center gap-1.5 text-gray-300">
-                <Database className="w-3.5 h-3.5 text-amber-400" />
+              <div className="flex items-center gap-1.5 text-slate-700 font-medium">
+                <Database className="w-3.5 h-3.5 text-amber-500" />
                 <span>
                   IndexedDB Queue: <strong>{pendingReports.length}</strong> Pending Sync
                 </span>
@@ -360,7 +352,7 @@ export const FieldOfficerModal: React.FC<FieldOfficerModalProps> = ({
                   type="button"
                   onClick={handleSyncAll}
                   disabled={isSyncing}
-                  className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold rounded text-[10px] flex items-center gap-1 transition shadow-sm"
+                  className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold rounded-lg text-[10px] flex items-center gap-1 transition shadow-xs"
                 >
                   {isSyncing ? (
                     <RefreshCw className="w-3 h-3 animate-spin" />
@@ -373,16 +365,16 @@ export const FieldOfficerModal: React.FC<FieldOfficerModalProps> = ({
             </div>
 
             {pendingReports.length > 0 && (
-              <div className="max-h-28 overflow-y-auto space-y-1 bg-gray-950/80 p-2 rounded border border-gray-800">
+              <div className="max-h-28 overflow-y-auto space-y-1 bg-slate-50 p-2 rounded-xl border border-slate-200">
                 {pendingReports.map((p) => (
                   <div
                     key={p.local_id}
-                    className="flex items-center justify-between text-[10px] p-1 bg-gray-900 rounded"
+                    className="flex items-center justify-between text-[10px] p-1.5 bg-white border border-slate-100 rounded-lg"
                   >
                     <div>
-                      <strong className="text-amber-300">{p.type}</strong> • {p.road_name}
+                      <strong className="text-amber-800">{p.type}</strong> • {p.road_name}
                     </div>
-                    <span className="font-mono text-gray-500 text-[9px]">{p.local_id}</span>
+                    <span className="font-mono text-slate-400 text-[9px]">{p.local_id}</span>
                   </div>
                 ))}
               </div>

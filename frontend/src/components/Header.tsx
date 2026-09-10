@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldAlert, Activity, RefreshCw, Compass, AlertTriangle, Truck, Smartphone } from 'lucide-react';
+import { ShieldAlert, Activity, RefreshCw, Compass, AlertTriangle, Truck, Smartphone, CloudRain, Zap } from 'lucide-react';
 
 interface HeaderProps {
   scenarioName: string;
@@ -19,6 +19,8 @@ interface HeaderProps {
   onSwitchToFieldOfficer?: () => void;
   onSwitchToDriver?: () => void;
   pendingOfflineCount: number;
+  onOpenWeather?: () => void;
+  isWeatherActive?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -39,148 +41,173 @@ export const Header: React.FC<HeaderProps> = ({
   onSwitchToFieldOfficer,
   onSwitchToDriver,
   pendingOfflineCount,
+  onOpenWeather,
+  isWeatherActive,
 }) => {
-
-
   return (
-    <header className="bg-gray-900 border-b border-gray-800 px-6 py-3.5 flex flex-wrap items-center justify-between gap-4 select-none">
-      <div className="flex items-center gap-3">
-        <div className="p-2 bg-blue-500/10 border border-blue-500/30 rounded-lg text-blue-400">
-          <Activity className="w-5 h-5 animate-pulse" />
-        </div>
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-base font-bold tracking-tight text-white flex items-center gap-2">
-              <span>NER Logistics Intelligence Platform</span>
-              <span className="text-xs px-2 py-0.5 rounded bg-blue-900/60 border border-blue-700/60 text-blue-300 font-mono font-normal">
+    <header className="bg-white border-b border-slate-200 px-4 sm:px-6 py-2.5 select-none shadow-xs">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+
+        {/* ── Brand ── */}
+        <div className="flex items-center gap-2.5 shrink-0">
+          <div className="p-1.5 bg-gradient-to-br from-blue-500 to-blue-700 rounded-lg text-white shadow-xs">
+            <Activity className="w-4 h-4" />
+          </div>
+          <div>
+            <h1 className="text-sm font-black tracking-tight text-slate-900 leading-tight flex items-center gap-2">
+              NER Logistics Intelligence Platform
+              <span className="hidden sm:inline text-[9px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-100 font-mono font-bold tracking-widest">
                 CONTROL TOWER
               </span>
             </h1>
-          </div>
-          <div className="flex items-center gap-2 mt-0.5 text-xs text-gray-400">
-            <span>Scenario:</span>
-            <span className="text-gray-200 font-medium">{scenarioName}</span>
-            <span className="text-gray-600">•</span>
-            <span className="text-blue-400">NetworkX Risk Engine Active</span>
+            <div className="flex items-center gap-1.5 text-[10px] text-slate-400">
+              <span className="text-slate-500">{scenarioName}</span>
+              <span className="text-slate-300">•</span>
+              <span className="text-blue-600 font-semibold flex items-center gap-0.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse inline-block mr-0.5" />
+                NetworkX Risk Engine Active
+              </span>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Action Controls */}
-      <div className="flex items-center gap-2.5">
-        {/* Driver Portal Direct Switcher */}
-        {onSwitchToDriver && (
-          <button
-            onClick={onSwitchToDriver}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-md shadow-emerald-600/20 border border-emerald-400/50 transition group active:scale-95"
-            title="Switch into Logistics Driver Console"
-          >
-            <Truck className="w-4 h-4 text-white group-hover:scale-110 transition-transform" />
-            <span>DRIVER PORTAL</span>
-            <span className="px-1.5 py-0.2 rounded-full bg-emerald-950 text-emerald-300 font-mono font-bold text-[10px]">
-              TRIP
-            </span>
-          </button>
-        )}
+        {/* ── Controls ── */}
+        <div className="flex items-center gap-1.5 flex-wrap">
 
-        {/* Field Officer Client Direct Switcher */}
-        {onSwitchToFieldOfficer && (
+          {/* Portal switchers — grouped with distinct bg */}
+          <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200">
+            {onSwitchToDriver && (
+              <button
+                onClick={onSwitchToDriver}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-black bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition active:scale-95 group"
+                title="Switch into Logistics Driver Console"
+              >
+                <Truck className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
+                <span className="hidden sm:inline">DRIVER PORTAL</span>
+                <span className="px-1.5 py-0.5 rounded-md bg-emerald-800/60 text-emerald-100 font-mono text-[9px] font-bold">TRIP</span>
+              </button>
+            )}
+            {onSwitchToFieldOfficer && (
+              <button
+                onClick={onSwitchToFieldOfficer}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-black bg-blue-600 hover:bg-blue-700 text-white shadow-xs transition active:scale-95 group"
+                title="Switch into Field Officer Tactical Interface"
+              >
+                <Smartphone className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
+                <span className="hidden sm:inline">FIELD OFFICER CLIENT</span>
+                {pendingOfflineCount > 0 ? (
+                  <span className="px-1.5 py-0.5 rounded-md bg-amber-500 text-white font-black text-[9px] animate-pulse">{pendingOfflineCount}Q</span>
+                ) : (
+                  <span className="px-1.5 py-0.5 rounded-md bg-blue-800/60 text-blue-100 font-mono text-[9px] font-bold">D102</span>
+                )}
+              </button>
+            )}
+          </div>
+
+          <div className="w-px h-6 bg-slate-200 mx-0.5 hidden sm:block" />
+
+          {/* Fleet & Impact */}
           <button
-            onClick={onSwitchToFieldOfficer}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-md shadow-blue-600/20 border border-blue-400/50 transition group active:scale-95"
-            title="Switch into Field Officer Mobile Tactical Route Interface"
+            onClick={onToggleFleetDrawer}
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-all border active:scale-95 ${
+              isFleetDrawerOpen
+                ? 'bg-blue-600 text-white border-blue-700 shadow-xs'
+                : atRiskVehiclesCount > 0
+                ? 'bg-rose-50 text-rose-800 border-rose-300 hover:bg-rose-100'
+                : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 hover:border-slate-300'
+            }`}
           >
-            <Smartphone className="w-4 h-4 text-white group-hover:scale-110 transition-transform" />
-            <span>FIELD OFFICER CLIENT</span>
-            {pendingOfflineCount > 0 ? (
-              <span className="px-1.5 py-0.2 rounded-full bg-amber-500 text-gray-950 font-black text-[10px] animate-pulse">
-                {pendingOfflineCount} QUEUED
-              </span>
-            ) : (
-              <span className="px-1.5 py-0.2 rounded-full bg-red-500 text-white font-black text-[10px] animate-pulse">
-                D102
+            <Truck className={`w-3.5 h-3.5 ${isFleetDrawerOpen ? 'text-white' : atRiskVehiclesCount > 0 ? 'text-rose-600' : 'text-blue-600'}`} />
+            <span className="hidden md:inline">FLEET &amp; IMPACT</span>
+            {atRiskVehiclesCount > 0 && (
+              <span className={`px-1.5 py-0.5 rounded-md font-bold text-[9px] animate-pulse ${isFleetDrawerOpen ? 'bg-white/20 text-white' : 'bg-rose-600 text-white'}`}>
+                {atRiskVehiclesCount} AT RISK
               </span>
             )}
           </button>
-        )}
 
+          {/* Incident Queue */}
+          <button
+            onClick={onToggleIncidentPanel}
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-all border active:scale-95 ${
+              isIncidentPanelOpen
+                ? 'bg-amber-500 text-white border-amber-600 shadow-xs'
+                : unverifiedIncidentsCount > 0
+                ? 'bg-amber-50 text-amber-800 border-amber-300 hover:bg-amber-100'
+                : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+            }`}
+          >
+            <AlertTriangle className={`w-3.5 h-3.5 ${isIncidentPanelOpen ? 'text-white' : 'text-amber-500'}`} />
+            <span className="hidden md:inline">INCIDENT QUEUE</span>
+            {unverifiedIncidentsCount > 0 && (
+              <span className={`w-5 h-5 rounded-full flex items-center justify-center font-bold text-[9px] ${isIncidentPanelOpen ? 'bg-white/20 text-white' : 'bg-amber-500 text-white'}`}>
+                {unverifiedIncidentsCount}
+              </span>
+            )}
+          </button>
 
-
-        {/* Fleet & Logistics Impact Toggle */}
-        <button
-          onClick={onToggleFleetDrawer}
-          className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-semibold transition-all border ${
-            isFleetDrawerOpen
-              ? 'bg-blue-600 text-white border-blue-500 shadow-[0_0_12px_rgba(59,130,246,0.5)]'
-              : 'bg-gray-800 text-gray-300 border-gray-700 hover:border-blue-500 hover:text-blue-300'
-          }`}
-        >
-          <Truck className="w-4 h-4 text-blue-400" />
-          <span>FLEET &amp; IMPACT</span>
-          {atRiskVehiclesCount > 0 && (
-            <span className="px-1.5 py-0.2 rounded-full bg-red-500 text-white font-bold text-[10px] animate-pulse">
-              {atRiskVehiclesCount} AT RISK
-            </span>
+          {/* Weather */}
+          {onOpenWeather && (
+            <button
+              onClick={onOpenWeather}
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-all border active:scale-95 ${
+                isWeatherActive
+                  ? 'bg-sky-600 text-white border-sky-700 shadow-xs'
+                  : 'bg-sky-50 hover:bg-sky-100 text-sky-800 border-sky-200'
+              }`}
+              title="Assam Weather Intelligence — All Districts Radar"
+            >
+              <CloudRain className={`w-3.5 h-3.5 ${isWeatherActive ? 'text-white' : 'text-sky-600'}`} />
+              <span className="hidden md:inline">WEATHER (ASSAM)</span>
+              <span className={`px-1.5 py-0.5 rounded-md font-mono text-[9px] font-bold ${isWeatherActive ? 'bg-sky-800/50 text-white' : 'bg-sky-600 text-white'}`}>35</span>
+            </button>
           )}
-        </button>
 
-        {/* Incidents Queue Toggle */}
-        <button
-          onClick={onToggleIncidentPanel}
-          className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-semibold transition-all border ${
-            isIncidentPanelOpen
-              ? 'bg-amber-600 text-white border-amber-500 shadow-[0_0_12px_rgba(245,158,11,0.5)]'
-              : 'bg-gray-800 text-gray-300 border-gray-700 hover:border-amber-500 hover:text-amber-300'
-          }`}
-        >
-          <AlertTriangle className="w-4 h-4 text-amber-400" />
-          <span>INCIDENT QUEUE</span>
-          {unverifiedIncidentsCount > 0 && (
-            <span className="px-1.5 py-0.2 rounded-full bg-amber-500 text-gray-950 font-bold text-[10px]">
-              {unverifiedIncidentsCount}
-            </span>
-          )}
-        </button>
+          {/* Route Planner */}
+          <button
+            onClick={onToggleRoutePlanner}
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-all border active:scale-95 ${
+              isRoutePlannerOpen
+                ? 'bg-violet-600 text-white border-violet-700 shadow-xs'
+                : 'bg-white text-slate-700 border-slate-200 hover:bg-violet-50 hover:border-violet-300 hover:text-violet-700'
+            }`}
+          >
+            <Compass className={`w-3.5 h-3.5 ${isRoutePlannerOpen ? 'text-white' : 'text-violet-600'}`} />
+            <span className="hidden md:inline">ROUTE PLANNER</span>
+            {hasActiveRoute && (
+              <span className={`w-2 h-2 rounded-full animate-ping ${isRoutePlannerOpen ? 'bg-white' : 'bg-violet-500'}`} />
+            )}
+          </button>
 
-        {/* Route Planner Toggle */}
-        <button
-          onClick={onToggleRoutePlanner}
-          className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-semibold transition-all border ${
-            isRoutePlannerOpen
-              ? 'bg-blue-600 text-white border-blue-500 shadow-[0_0_12px_rgba(59,130,246,0.5)]'
-              : 'bg-gray-800 text-gray-300 border-gray-700 hover:border-blue-500 hover:text-blue-300'
-          }`}
-        >
-          <Compass className="w-4 h-4" />
-          <span>ROUTE PLANNER</span>
-          {hasActiveRoute && (
-            <span className="w-2 h-2 rounded-full bg-blue-400 animate-ping"></span>
-          )}
-        </button>
+          {/* Emergency Mode */}
+          <button
+            onClick={onToggleEmergency}
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-all border active:scale-95 ${
+              emergencyMode
+                ? 'bg-rose-600 text-white border-rose-700 shadow-xs animate-pulse'
+                : 'bg-white text-slate-600 border-slate-200 hover:border-rose-300 hover:text-rose-600 hover:bg-rose-50'
+            }`}
+          >
+            {emergencyMode
+              ? <Zap className="w-3.5 h-3.5 text-white" />
+              : <ShieldAlert className="w-3.5 h-3.5 text-slate-400" />
+            }
+            <span className="hidden lg:inline">{emergencyMode ? 'EMERGENCY ACTIVE' : 'EMERGENCY MODE'}</span>
+          </button>
 
-        {/* Emergency Mode Toggle */}
-        <button
-          onClick={onToggleEmergency}
-          className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-semibold transition-all border ${
-            emergencyMode
-              ? 'bg-red-600 text-white border-red-500 shadow-[0_0_15px_rgba(239,68,68,0.5)] animate-pulse'
-              : 'bg-gray-800 text-gray-300 border-gray-700 hover:border-red-500 hover:text-red-400'
-          }`}
-        >
-          <ShieldAlert className="w-4 h-4" />
-          <span>{emergencyMode ? 'EMERGENCY MODE ACTIVE' : 'EMERGENCY MODE'}</span>
-        </button>
-
-        {/* Refresh Button */}
-        <button
-          onClick={onRefresh}
-          disabled={isLoading}
-          className="p-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-md border border-gray-700 transition disabled:opacity-50"
-          title="Refresh Data"
-        >
-          <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-blue-400' : ''}`} />
-        </button>
+          {/* Refresh */}
+          <button
+            onClick={onRefresh}
+            disabled={isLoading}
+            className="p-1.5 bg-white hover:bg-slate-50 text-slate-500 rounded-lg border border-slate-200 transition disabled:opacity-40 active:scale-95"
+            title="Refresh Data"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-blue-600' : ''}`} />
+          </button>
+        </div>
       </div>
     </header>
   );
 };
+
+

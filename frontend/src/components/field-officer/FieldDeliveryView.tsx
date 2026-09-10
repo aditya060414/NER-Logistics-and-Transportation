@@ -44,38 +44,38 @@ export const FieldDeliveryView: React.FC<FieldDeliveryViewProps> = ({
     switch (st) {
       case 'CRITICAL':
       case 'AT_RISK':
-        return 'bg-red-950 text-red-300 border-red-700';
+        return 'bg-rose-50 text-rose-700 border-rose-200';
       case 'REROUTED':
       case 'REROUTED_IN_TRANSIT':
-        return 'bg-purple-950 text-purple-300 border-purple-700';
+        return 'bg-purple-50 text-purple-700 border-purple-200';
       case 'DELAYED':
-        return 'bg-amber-950 text-amber-300 border-amber-700';
+        return 'bg-amber-50 text-amber-700 border-amber-200';
       case 'IN_TRANSIT':
-        return 'bg-blue-950 text-blue-300 border-blue-700';
+        return 'bg-blue-50 text-blue-700 border-blue-200';
       case 'COMPLETED':
       case 'ARRIVED':
-        return 'bg-emerald-950 text-emerald-300 border-emerald-700';
+        return 'bg-emerald-50 text-emerald-700 border-emerald-200';
       default:
-        return 'bg-gray-800 text-gray-300 border-gray-700';
+        return 'bg-slate-100 text-slate-700 border-slate-200';
     }
   };
 
   return (
-    <div className="space-y-4 pb-8 max-w-5xl mx-auto text-xs text-gray-200">
+    <div className="space-y-4 pb-8 max-w-5xl mx-auto text-xs text-slate-700">
       {/* Header Banner */}
-      <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 shadow-xl flex items-center justify-between">
+      <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-blue-950 border border-blue-700/60 flex items-center justify-center text-blue-400">
+          <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600">
             <Truck className="w-5 h-5" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-bold text-base text-white">{delivery?.id || 'D102'}</span>
-              <span className="text-[10px] font-bold text-red-400 px-2 py-0.5 bg-red-950 border border-red-800 rounded-full">
+              <span className="font-bold text-base text-slate-900">{delivery?.id || 'D102'}</span>
+              <span className="text-[10px] font-bold text-rose-700 px-2 py-0.5 bg-rose-50 border border-rose-200 rounded-full">
                 PRIORITY: {delivery?.priority || 'CRITICAL'}
               </span>
             </div>
-            <span className="text-xs text-gray-400 block mt-0.5">Assam Essential Cargo Lifeline Dispatch</span>
+            <span className="text-xs text-slate-500 block mt-0.5">Assam Essential Cargo Lifeline Dispatch</span>
           </div>
         </div>
         <span className={`px-3 py-1.5 rounded-xl text-xs font-black border uppercase tracking-wider ${getStatusBadgeColor(currentStatus)}`}>
@@ -86,61 +86,61 @@ export const FieldDeliveryView: React.FC<FieldDeliveryViewProps> = ({
       {/* 2-Column Responsive Content */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {/* Left Column: Delivery Details & Consignment Info */}
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 md:p-5 shadow-xl space-y-4">
-          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">
+        <div className="bg-white border border-slate-200 rounded-2xl p-4 md:p-5 shadow-xs space-y-4">
+          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
             Consignment & Corridor Specifications
           </span>
 
           {/* Cargo Summary */}
-          <div className="bg-gray-950 p-3.5 rounded-xl border border-gray-800 space-y-1">
-            <span className="text-[10px] text-gray-500 font-bold uppercase">{t.cargo}</span>
-            <p className="font-bold text-white text-sm">{delivery?.cargo_name || 'Emergency IV Fluids & Trauma Kits'}</p>
-            <p className="text-[11px] text-gray-400">Class: Temperature-Controlled Pharmaceuticals / Emergency Relief</p>
+          <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
+            <span className="text-[10px] text-slate-500 font-bold uppercase">{t.cargo}</span>
+            <p className="font-bold text-slate-900 text-sm">{delivery?.cargo_name || 'Emergency IV Fluids & Trauma Kits'}</p>
+            <p className="text-[11px] text-slate-500">Class: Temperature-Controlled Pharmaceuticals / Emergency Relief</p>
           </div>
 
           {/* Origin & Destination Corridor */}
-          <div className="grid grid-cols-2 gap-3 bg-gray-950 p-3.5 rounded-xl border border-gray-800">
+          <div className="grid grid-cols-2 gap-3 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
             <div>
-              <span className="text-[9px] font-bold text-gray-500 uppercase block">{t.from}</span>
-              <p className="font-bold text-white text-sm">{delivery?.origin ? delivery.origin.split(' ')[0] : 'Guwahati'}</p>
-              <span className="text-[11px] text-gray-400 block truncate">Central Supply Depot</span>
+              <span className="text-[9px] font-bold text-slate-500 uppercase block">{t.from}</span>
+              <p className="font-bold text-slate-800 text-sm">{delivery?.origin ? delivery.origin.split(' ')[0] : 'Guwahati'}</p>
+              <span className="text-[11px] text-slate-500 block truncate">Central Supply Depot</span>
             </div>
             <div>
-              <span className="text-[9px] font-bold text-gray-500 uppercase block">{t.to}</span>
-              <p className="font-bold text-emerald-300 text-sm">{delivery?.destination ? delivery.destination.split(' ')[0] : 'Haflong'}</p>
-              <span className="text-[11px] text-emerald-400/80 block truncate">Civil Hospital Depot</span>
+              <span className="text-[9px] font-bold text-slate-500 uppercase block">{t.to}</span>
+              <p className="font-bold text-emerald-700 text-sm">{delivery?.destination ? delivery.destination.split(' ')[0] : 'Haflong'}</p>
+              <span className="text-[11px] text-emerald-600 block truncate">Civil Hospital Depot</span>
             </div>
           </div>
 
           {/* Schedule, ETA and Delays */}
-          <div className="grid grid-cols-3 gap-2 bg-gray-950 p-3 rounded-xl border border-gray-800 text-center text-xs">
+          <div className="grid grid-cols-3 gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200 text-center text-xs">
             <div>
-              <span className="text-[9px] text-gray-500 block">Scheduled ETA</span>
-              <span className="font-bold text-white">16:00 UTC</span>
+              <span className="text-[9px] text-slate-500 block">Scheduled ETA</span>
+              <span className="font-bold text-slate-900">16:00 UTC</span>
             </div>
             <div>
-              <span className="text-[9px] text-gray-500 block">Reported Delay</span>
-              <span className="font-bold text-amber-400">
+              <span className="text-[9px] text-slate-500 block">Reported Delay</span>
+              <span className="font-bold text-amber-600">
                 +{delivery?.delay_minutes || 42} min
               </span>
             </div>
             <div>
-              <span className="text-[9px] text-gray-500 block">Corridor Risk</span>
-              <span className="font-bold text-amber-300">{delivery?.risk_level || 'MEDIUM'}</span>
+              <span className="text-[9px] text-slate-500 block">Corridor Risk</span>
+              <span className="font-bold text-amber-600">{delivery?.risk_level || 'MEDIUM'}</span>
             </div>
           </div>
 
           {/* Assigned Vehicle & Driver */}
-          <div className="bg-gray-950/70 p-3 rounded-xl border border-gray-800 flex items-center justify-between text-xs">
+          <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 flex items-center justify-between text-xs">
             <div>
-              <span className="text-[9px] text-gray-500 block">Assigned Transport</span>
-              <span className="font-bold text-gray-200">{vehicle?.vehicle_number || 'AS-01-TR-102'}</span>
-              <span className="text-[10px] text-gray-400 block">{vehicle?.vehicle_type || 'Medium Heavy Relief'}</span>
+              <span className="text-[9px] text-slate-500 block">Assigned Transport</span>
+              <span className="font-bold text-slate-800">{vehicle?.vehicle_number || 'AS-01-TR-102'}</span>
+              <span className="text-[10px] text-slate-500 block">{vehicle?.vehicle_type || 'Medium Heavy Relief'}</span>
             </div>
             <div className="text-right">
-              <span className="text-[9px] text-gray-500 block">Assigned Driver</span>
-              <span className="font-bold text-gray-200">{vehicle?.driver_name || 'Ramen Barman'}</span>
-              <span className="text-[10px] text-gray-400 block">{vehicle?.driver_phone || '+91 94350-XXXXX'}</span>
+              <span className="text-[9px] text-slate-500 block">Assigned Driver</span>
+              <span className="font-bold text-slate-800">{vehicle?.driver_name || 'Ramen Barman'}</span>
+              <span className="text-[10px] text-slate-500 block">{vehicle?.driver_phone || '+91 94350-XXXXX'}</span>
             </div>
           </div>
 
@@ -148,7 +148,7 @@ export const FieldDeliveryView: React.FC<FieldDeliveryViewProps> = ({
           <button
             type="button"
             onClick={onNavigateToRoute}
-            className="w-full py-3 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/50 text-blue-300 font-bold rounded-xl flex items-center justify-center gap-1.5 transition text-xs"
+            className="w-full py-3 bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 font-bold rounded-xl flex items-center justify-center gap-1.5 transition text-xs shadow-xs"
           >
             <Navigation className="w-4 h-4" />
             <span>{t.viewRoute}</span>
@@ -156,12 +156,12 @@ export const FieldDeliveryView: React.FC<FieldDeliveryViewProps> = ({
         </div>
 
         {/* Right Column: TASK WORKFLOW STATUS PROGRESSION */}
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 md:p-5 shadow-xl space-y-4 flex flex-col justify-between">
+        <div className="bg-white border border-slate-200 rounded-2xl p-4 md:p-5 shadow-xs space-y-4 flex flex-col justify-between">
           <div className="space-y-3">
-            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
               Operational Task Actions
             </span>
-            <p className="text-[11px] text-gray-400 leading-relaxed">
+            <p className="text-[11px] text-slate-500 leading-relaxed">
               Update dispatch telemetry and mission phase timestamps for SDMA control tower synchronization.
             </p>
 
@@ -170,7 +170,7 @@ export const FieldDeliveryView: React.FC<FieldDeliveryViewProps> = ({
                 type="button"
                 disabled={isUpdating || currentStatus === 'ACCEPTED'}
                 onClick={() => handleStatusClick('ACCEPTED')}
-                className="py-3 px-3.5 bg-gray-950 hover:bg-gray-800 border border-gray-700 rounded-xl font-bold text-xs text-blue-400 flex items-center justify-center gap-1.5 transition disabled:opacity-40"
+                className="py-3 px-3.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl font-bold text-xs text-blue-700 flex items-center justify-center gap-1.5 transition disabled:opacity-40"
               >
                 ✓ ACCEPT MISSION
               </button>
@@ -179,7 +179,7 @@ export const FieldDeliveryView: React.FC<FieldDeliveryViewProps> = ({
                 type="button"
                 disabled={isUpdating || currentStatus === 'IN_TRANSIT'}
                 onClick={() => handleStatusClick('IN_TRANSIT')}
-                className="py-3 px-3.5 bg-gray-950 hover:bg-gray-800 border border-gray-700 rounded-xl font-bold text-xs text-emerald-400 flex items-center justify-center gap-1.5 transition disabled:opacity-40"
+                className="py-3 px-3.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl font-bold text-xs text-emerald-700 flex items-center justify-center gap-1.5 transition disabled:opacity-40"
               >
                 ▶ START TRANSIT
               </button>
@@ -188,7 +188,7 @@ export const FieldDeliveryView: React.FC<FieldDeliveryViewProps> = ({
                 type="button"
                 disabled={isUpdating || currentStatus === 'DELAYED'}
                 onClick={() => handleStatusClick('DELAYED', 45)}
-                className="py-3 px-3.5 bg-gray-950 hover:bg-gray-800 border border-gray-700 rounded-xl font-bold text-xs text-amber-400 flex items-center justify-center gap-1.5 transition disabled:opacity-40"
+                className="py-3 px-3.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl font-bold text-xs text-amber-700 flex items-center justify-center gap-1.5 transition disabled:opacity-40"
               >
                 ⚠ REPORT DELAY (+45m)
               </button>
@@ -197,19 +197,19 @@ export const FieldDeliveryView: React.FC<FieldDeliveryViewProps> = ({
                 type="button"
                 disabled={isUpdating || currentStatus === 'ARRIVED'}
                 onClick={() => handleStatusClick('ARRIVED')}
-                className="py-3 px-3.5 bg-gray-950 hover:bg-gray-800 border border-gray-700 rounded-xl font-bold text-xs text-purple-400 flex items-center justify-center gap-1.5 transition disabled:opacity-40"
+                className="py-3 px-3.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl font-bold text-xs text-purple-700 flex items-center justify-center gap-1.5 transition disabled:opacity-40"
               >
                 📍 ARRIVED DESTINATION
               </button>
             </div>
           </div>
 
-          <div className="pt-4 border-t border-gray-800">
+          <div className="pt-4 border-t border-slate-200">
             <button
               type="button"
               disabled={isUpdating || currentStatus === 'COMPLETED'}
               onClick={() => handleStatusClick('COMPLETED')}
-              className="w-full py-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black rounded-xl shadow-xl shadow-emerald-600/25 flex items-center justify-center gap-2 transition text-sm uppercase tracking-wider disabled:opacity-40"
+              className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-xl shadow-xs flex items-center justify-center gap-2 transition text-sm uppercase tracking-wider disabled:opacity-40"
             >
               <CheckCircle2 className="w-5 h-5" />
               <span>MARK MISSION COMPLETED</span>

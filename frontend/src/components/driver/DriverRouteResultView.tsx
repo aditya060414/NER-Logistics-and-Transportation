@@ -109,23 +109,23 @@ export const DriverRouteResultView: React.FC<DriverRouteResultViewProps> = ({
   ];
 
   return (
-    <div className="w-full max-w-5xl mx-auto space-y-4 p-4 sm:p-6 text-gray-100 font-sans pb-28">
+    <div className="w-full max-w-5xl mx-auto space-y-4 p-4 sm:p-6 text-slate-800 font-sans pb-28">
       {/* Top Header Card */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-gray-900/90 border border-gray-800 rounded-3xl p-5 shadow-2xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white border border-slate-200 rounded-3xl p-5 shadow-xs">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-full bg-emerald-950/80 border border-emerald-500/50 text-emerald-400 text-[10px] font-mono font-bold tracking-wider uppercase">
+            <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-mono font-bold tracking-wider uppercase">
               STEP 2 OF 3 • SAFE CORRIDOR COMPUTED
             </span>
-            <span className="px-2 py-0.5 rounded-full bg-blue-900/50 border border-blue-500/40 text-blue-300 text-[10px] font-mono font-bold">
+            <span className="px-2 py-0.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-[10px] font-mono font-bold">
               {delivery.consignment_id || delivery.id}
             </span>
           </div>
-          <h2 className="text-xl sm:text-2xl font-black text-white uppercase tracking-tight">
+          <h2 className="text-xl sm:text-2xl font-black text-slate-900 uppercase tracking-tight">
             Safe Logistics Route
           </h2>
-          <p className="text-xs text-gray-400">
-            {delivery.cargo_name} • <span className="text-gray-200 font-bold">{delivery.cargo_type}</span> ({delivery.priority}) • Driver {driver.name} ({driver.vehicle_number})
+          <p className="text-xs text-slate-500">
+            {delivery.cargo_name} • <span className="text-slate-800 font-bold">{delivery.cargo_type}</span> ({delivery.priority}) • Driver {driver.name} ({driver.vehicle_number})
           </p>
         </div>
 
@@ -133,9 +133,9 @@ export const DriverRouteResultView: React.FC<DriverRouteResultViewProps> = ({
           <button
             type="button"
             onClick={onEditConsignment}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-gray-800 hover:bg-gray-700 border border-gray-700 text-gray-300 text-xs font-bold transition"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 hover:text-slate-900 text-xs font-bold transition shadow-xs"
           >
-            <Edit3 className="w-3.5 h-3.5 text-blue-400" />
+            <Edit3 className="w-3.5 h-3.5 text-blue-600" />
             <span>Edit Consignment</span>
           </button>
         </div>
@@ -144,7 +144,7 @@ export const DriverRouteResultView: React.FC<DriverRouteResultViewProps> = ({
       {/* Main Grid: Map & Route Details */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
         {/* Left Column: Interactive Map (7 cols) */}
-        <div className="lg:col-span-7 bg-gray-900 border border-gray-800 rounded-3xl overflow-hidden shadow-2xl relative h-[380px] sm:h-[440px]">
+        <div className="lg:col-span-7 bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-xs relative h-[380px] sm:h-[440px]">
           <MapContainer
             center={[delivery.origin_coords.lat, delivery.origin_coords.lon]}
             zoom={8}
@@ -177,7 +177,7 @@ export const DriverRouteResultView: React.FC<DriverRouteResultViewProps> = ({
                   key={idx}
                   positions={item.route.coordinates}
                   pathOptions={{
-                    color: '#6b7280',
+                    color: '#94a3b8',
                     weight: 3,
                     dashArray: '6, 8',
                     opacity: 0.6,
@@ -214,9 +214,9 @@ export const DriverRouteResultView: React.FC<DriverRouteResultViewProps> = ({
           </MapContainer>
 
           {/* Map Overlay Badge */}
-          <div className="absolute top-4 left-4 z-[1000] bg-gray-950/85 backdrop-blur-md border border-gray-800 rounded-2xl px-3.5 py-2 text-xs flex items-center gap-2 shadow-xl">
-            <Layers className="w-4 h-4 text-blue-400" />
-            <span className="font-bold text-white text-[11px] uppercase">
+          <div className="absolute top-4 left-4 z-[1000] bg-white/90 backdrop-blur-md border border-slate-200 rounded-2xl px-3.5 py-2 text-xs flex items-center gap-2 shadow-sm">
+            <Layers className="w-4 h-4 text-blue-600" />
+            <span className="font-bold text-slate-800 text-[11px] uppercase">
               {activeOption.label}
             </span>
           </div>
@@ -226,7 +226,7 @@ export const DriverRouteResultView: React.FC<DriverRouteResultViewProps> = ({
         <div className="lg:col-span-5 space-y-4 flex flex-col justify-between">
           {/* Route Selector Tabs if alternatives exist */}
           {allRoutes.length > 1 && (
-            <div className="flex items-center gap-2 p-1.5 bg-gray-900 border border-gray-800 rounded-2xl">
+            <div className="flex items-center gap-2 p-1.5 bg-slate-100/80 border border-slate-200 rounded-2xl">
               {allRoutes.map((item, idx) => (
                 <button
                   key={idx}
@@ -234,11 +234,11 @@ export const DriverRouteResultView: React.FC<DriverRouteResultViewProps> = ({
                   onClick={() => setSelectedRouteIndex(idx)}
                   className={`flex-1 py-2 px-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${
                     selectedRouteIndex === idx
-                      ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
-                      : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                      ? 'bg-white text-blue-600 shadow-xs border border-slate-200/60'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
                   }`}
                 >
-                  {item.isRecommended && <Sparkles className="w-3.5 h-3.5 text-amber-300" />}
+                  {item.isRecommended && <Sparkles className="w-3.5 h-3.5 text-amber-500" />}
                   <span>{item.isRecommended ? 'Safest' : `Alt ${idx}`}</span>
                 </button>
               ))}
@@ -246,18 +246,18 @@ export const DriverRouteResultView: React.FC<DriverRouteResultViewProps> = ({
           )}
 
           {/* Metrics Card */}
-          <div className="bg-gray-900/90 border border-gray-800 rounded-3xl p-5 shadow-2xl space-y-4">
+          <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-xs space-y-4">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-black text-gray-300 uppercase tracking-wider">
+              <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">
                 Telemetry Estimates
               </span>
               <span
                 className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono font-black uppercase ${
                   activeRoute?.risk_level === 'LOW'
-                    ? 'bg-emerald-950 border border-emerald-500/50 text-emerald-300'
+                    ? 'bg-emerald-50 border border-emerald-200 text-emerald-700'
                     : activeRoute?.risk_level === 'MEDIUM'
-                    ? 'bg-amber-950 border border-amber-500/50 text-amber-300'
-                    : 'bg-red-950 border border-red-500/50 text-red-300'
+                    ? 'bg-amber-50 border border-amber-200 text-amber-700'
+                    : 'bg-rose-50 border border-rose-200 text-rose-700'
                 }`}
               >
                 {activeRoute?.risk_level || 'LOW'} ROAD RISK
@@ -265,22 +265,22 @@ export const DriverRouteResultView: React.FC<DriverRouteResultViewProps> = ({
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <div className="p-3.5 rounded-2xl bg-gray-950 border border-gray-800/80">
-                <div className="flex items-center gap-1.5 text-gray-400 text-xs font-medium mb-1">
-                  <Navigation className="w-3.5 h-3.5 text-blue-400" />
+              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80">
+                <div className="flex items-center gap-1.5 text-slate-500 text-xs font-medium mb-1">
+                  <Navigation className="w-3.5 h-3.5 text-blue-600" />
                   <span>Total Distance</span>
                 </div>
-                <div className="text-xl font-black text-white font-mono">
-                  {activeRoute?.distance_km?.toFixed(1) || '0.0'} <span className="text-xs text-gray-400">KM</span>
+                <div className="text-xl font-black text-slate-900 font-mono">
+                  {activeRoute?.distance_km?.toFixed(1) || '0.0'} <span className="text-xs text-slate-500 font-sans">KM</span>
                 </div>
               </div>
 
-              <div className="p-3.5 rounded-2xl bg-gray-950 border border-gray-800/80">
-                <div className="flex items-center gap-1.5 text-gray-400 text-xs font-medium mb-1">
-                  <Clock className="w-3.5 h-3.5 text-amber-400" />
+              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80">
+                <div className="flex items-center gap-1.5 text-slate-500 text-xs font-medium mb-1">
+                  <Clock className="w-3.5 h-3.5 text-amber-600" />
                   <span>Est. Drive Time</span>
                 </div>
-                <div className="text-xl font-black text-white font-mono">
+                <div className="text-xl font-black text-slate-900 font-mono">
                   {Math.floor((activeRoute?.eta_minutes || 0) / 60)}h{' '}
                   {Math.round((activeRoute?.eta_minutes || 0) % 60)}m
                 </div>
@@ -288,33 +288,33 @@ export const DriverRouteResultView: React.FC<DriverRouteResultViewProps> = ({
             </div>
 
             {/* Waypoints Strip */}
-            <div className="space-y-2 pt-2 border-t border-gray-800/80 text-xs">
-              <div className="flex items-center gap-2 text-gray-300">
-                <MapPin className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                <span className="text-gray-400">Pickup:</span>
-                <strong className="text-white truncate">{delivery.origin}</strong>
+            <div className="space-y-2 pt-2 border-t border-slate-100 text-xs">
+              <div className="flex items-center gap-2 text-slate-600">
+                <MapPin className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                <span className="text-slate-500">Pickup:</span>
+                <strong className="text-slate-800 truncate">{delivery.origin}</strong>
               </div>
-              <div className="flex items-center gap-2 text-gray-300">
-                <MapPin className="w-3.5 h-3.5 text-red-400 shrink-0" />
-                <span className="text-gray-400">Drop:</span>
-                <strong className="text-white truncate">{delivery.destination}</strong>
+              <div className="flex items-center gap-2 text-slate-600">
+                <MapPin className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                <span className="text-slate-500">Drop:</span>
+                <strong className="text-slate-800 truncate">{delivery.destination}</strong>
               </div>
             </div>
           </div>
 
           {/* "WHY THIS ROUTE?" Explainable Decision Box */}
-          <div className="bg-gradient-to-br from-blue-950/70 via-gray-900 to-indigo-950/50 border border-blue-600/40 rounded-3xl p-4 shadow-2xl space-y-2">
-            <div className="flex items-center gap-2 text-xs font-black text-blue-300 uppercase tracking-wider">
-              <Sparkles className="w-4 h-4 text-amber-400" />
+          <div className="bg-blue-50/50 border border-blue-200/70 rounded-3xl p-4 shadow-xs space-y-2">
+            <div className="flex items-center gap-2 text-xs font-bold text-blue-900 uppercase tracking-wider">
+              <Sparkles className="w-4 h-4 text-amber-500" />
               <span>AI Safe Route Rationale</span>
             </div>
-            <p className="text-xs text-gray-300 leading-relaxed">
+            <p className="text-xs text-slate-600 leading-relaxed">
               {activeRoute?.explanation ||
                 `Calculated via NetworkX multi-hazard graph engine. Prioritizes all-weather elevated roadways and bypasses active monsoon landslide sectors for ${delivery.priority} cargo.`}
             </p>
             {activeRoute?.avoided_high_risk_roads ? (
-              <div className="pt-1 flex items-center gap-1.5 text-[11px] text-emerald-300 font-bold">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+              <div className="pt-1 flex items-center gap-1.5 text-[11px] text-emerald-700 font-bold">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                 <span>Bypasses {activeRoute.avoided_high_risk_roads} hazardous road segments</span>
               </div>
             ) : null}
@@ -325,7 +325,7 @@ export const DriverRouteResultView: React.FC<DriverRouteResultViewProps> = ({
             <button
               type="button"
               onClick={() => activeRoute && onStartJourney(activeRoute)}
-              className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-sm uppercase tracking-wider shadow-2xl shadow-emerald-600/30 transition active:scale-98 flex items-center justify-center gap-3"
+              className="w-full py-4 px-6 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm uppercase tracking-wider shadow-sm transition active:scale-98 flex items-center justify-center gap-3"
             >
               <Navigation className="w-5 h-5 fill-current" />
               <span>START JOURNEY (DISPATCH NOW)</span>

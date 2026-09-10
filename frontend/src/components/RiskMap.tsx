@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { MapContainer, TileLayer, GeoJSON, Polyline, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import type { RiskGeoJSON, RoadRiskProperties } from '../types/risk';
 import type { RoutePlanResponse, RouteSummary } from '../types/route';
 import type { Incident } from '../types/incident';
@@ -19,22 +20,22 @@ interface RiskMapProps {
   onSelectVehicle?: (vehicle: Vehicle) => void;
 }
 
-const COLOR_CLOSED = '#4B5563'; // Dark Gray
-const COLOR_HIGH = '#EF4444';   // Vibrant Red
-const COLOR_MEDIUM = '#F59E0B'; // Amber Yellow
-const COLOR_LOW = '#10B981';    // Emerald Green
+const COLOR_CLOSED = '#64748B'; // Slate-500
+const COLOR_HIGH = '#DC2626';   // Crisp Red
+const COLOR_MEDIUM = '#D97706'; // Amber Yellow
+const COLOR_LOW = '#059669';    // Emerald Green
 
 // Custom divIcons for logistics depots and destinations
 const originIcon = L.divIcon({
   className: 'custom-origin-icon',
-  html: `<div style="display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: #10B981; border: 2px solid #ffffff; border-radius: 50%; box-shadow: 0 0 15px rgba(16, 185, 129, 0.9); font-size: 14px; cursor: pointer;">🟢</div>`,
+  html: `<div style="display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: #10B981; border: 2px solid #ffffff; border-radius: 50%; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.5); font-size: 14px; cursor: pointer;">🟢</div>`,
   iconSize: [28, 28],
   iconAnchor: [14, 14],
 });
 
 const destIcon = L.divIcon({
   className: 'custom-dest-icon',
-  html: `<div style="display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: #3B82F6; border: 2px solid #ffffff; border-radius: 50%; box-shadow: 0 0 15px rgba(59, 130, 246, 0.9); font-size: 14px; cursor: pointer;">🏁</div>`,
+  html: `<div style="display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: #3B82F6; border: 2px solid #ffffff; border-radius: 50%; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.5); font-size: 14px; cursor: pointer;">🏁</div>`,
   iconSize: [28, 28],
   iconAnchor: [14, 14],
 });
@@ -42,25 +43,24 @@ const destIcon = L.divIcon({
 // Incident Warning Icons
 const unverifiedIncidentIcon = L.divIcon({
   className: 'custom-unverified-incident-icon',
-  html: `<div style="display: flex; align-items: center; justify-content: center; width: 26px; height: 26px; background: #D97706; border: 2px solid #FEF3C7; border-radius: 50%; box-shadow: 0 0 14px rgba(245, 158, 11, 0.9); font-size: 12px; cursor: pointer;">⚠️</div>`,
+  html: `<div style="display: flex; align-items: center; justify-content: center; width: 26px; height: 26px; background: #D97706; border: 2px solid #FEF3C7; border-radius: 50%; box-shadow: 0 2px 8px rgba(217, 119, 6, 0.4); font-size: 12px; cursor: pointer;">⚠️</div>`,
   iconSize: [26, 26],
   iconAnchor: [13, 13],
 });
 
 const verifiedIncidentIcon = L.divIcon({
   className: 'custom-verified-incident-icon',
-  html: `<div style="display: flex; align-items: center; justify-content: center; width: 26px; height: 26px; background: #DC2626; border: 2px solid #FEE2E2; border-radius: 50%; box-shadow: 0 0 14px rgba(220, 38, 38, 0.9); font-size: 12px; cursor: pointer;">🛑</div>`,
+  html: `<div style="display: flex; align-items: center; justify-content: center; width: 26px; height: 26px; background: #DC2626; border: 2px solid #FEE2E2; border-radius: 50%; box-shadow: 0 2px 8px rgba(220, 38, 38, 0.4); font-size: 12px; cursor: pointer;">🛑</div>`,
   iconSize: [26, 26],
   iconAnchor: [13, 13],
 });
 
 // Vehicle Tracking DivIcon
 const getVehicleIcon = (status: string) => {
-  const color = status === 'AT_RISK' ? '#ef4444' : status === 'REROUTED' ? '#10b981' : '#3b82f6';
-  const shadow = status === 'AT_RISK' ? 'rgba(239, 68, 68, 0.9)' : status === 'REROUTED' ? 'rgba(16, 185, 129, 0.9)' : 'rgba(59, 130, 246, 0.9)';
+  const color = status === 'AT_RISK' ? '#dc2626' : status === 'REROUTED' ? '#059669' : '#2563eb';
   return L.divIcon({
     className: 'custom-vehicle-icon',
-    html: `<div style="display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; background: #0f172a; border: 2px solid ${color}; border-radius: 50%; box-shadow: 0 0 16px ${shadow}; font-size: 15px; cursor: pointer;">🚚</div>`,
+    html: `<div style="display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; background: #ffffff; border: 2px solid ${color}; border-radius: 50%; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15); font-size: 15px; cursor: pointer;">🚚</div>`,
     iconSize: [30, 30],
     iconAnchor: [15, 15],
   });
@@ -91,6 +91,30 @@ function MapBoundsUpdater({ route }: { route: RouteSummary | null }) {
   return null;
 }
 
+// Automatically invalidate and adapt map viewport sizing on mount and container resizing
+function MapResizer() {
+  const map = useMap();
+
+  useEffect(() => {
+    map.invalidateSize();
+    const timer = setTimeout(() => {
+      map.invalidateSize();
+    }, 200);
+
+    const handleResize = () => {
+      map.invalidateSize();
+    };
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [map]);
+
+  return null;
+}
+
 export const RiskMap: React.FC<RiskMapProps> = ({
   geojsonData,
   selectedRoad,
@@ -107,7 +131,7 @@ export const RiskMap: React.FC<RiskMapProps> = ({
 
   const roadStyle = (feature: any) => {
     if (!feature?.properties) {
-      return { color: COLOR_LOW, weight: 1.5, opacity: 0.5 };
+      return { color: COLOR_LOW, weight: 1.5, opacity: 0.6 };
     }
 
     const { risk_level, road_status, osm_id } = feature.properties;
@@ -126,7 +150,7 @@ export const RiskMap: React.FC<RiskMapProps> = ({
       return {
         color: COLOR_HIGH,
         weight: isSelected ? 5.0 : emergencyMode ? 4.0 : 3.2,
-        opacity: 0.9,
+        opacity: 0.95,
       };
     }
 
@@ -134,14 +158,14 @@ export const RiskMap: React.FC<RiskMapProps> = ({
       return {
         color: COLOR_MEDIUM,
         weight: isSelected ? 4.5 : emergencyMode ? 1.5 : 2.0,
-        opacity: emergencyMode ? 0.35 : 0.75,
+        opacity: emergencyMode ? 0.35 : 0.8,
       };
     }
 
     return {
       color: COLOR_LOW,
       weight: isSelected ? 3.5 : emergencyMode ? 0.8 : 1.2,
-      opacity: emergencyMode ? 0.15 : 0.5,
+      opacity: emergencyMode ? 0.2 : 0.6,
     };
   };
 
@@ -171,16 +195,16 @@ export const RiskMap: React.FC<RiskMapProps> = ({
     });
 
     const statusBadge = p.road_status === 'CLOSED'
-      ? '<span style="color: #9ca3af; font-weight: bold;">[CLOSED]</span>'
-      : `<span style="color: ${p.risk_level === 'HIGH' ? '#ef4444' : p.risk_level === 'MEDIUM' ? '#f59e0b' : '#10b981'}; font-weight: bold;">[${p.risk_level} RISK]</span>`;
+      ? '<span style="color: #64748b; font-weight: bold;">[CLOSED]</span>'
+      : `<span style="color: ${p.risk_level === 'HIGH' ? '#dc2626' : p.risk_level === 'MEDIUM' ? '#d97706' : '#059669'}; font-weight: bold;">[${p.risk_level} RISK]</span>`;
 
     layer.bindTooltip(
-      `<div style="font-size: 11px; padding: 2px 4px;">
+      `<div style="font-size: 11px; padding: 2px 4px; color: #0f172a;">
         <strong>${p.name || 'Unnamed Road'}</strong><br/>
-        District: ${p.district || 'Assam'}<br/>
-        Score: <strong>${p.risk_score ? p.risk_score.toFixed(3) : '0.00'}</strong> ${statusBadge}
+        <span style="color: #64748b;">District:</span> ${p.district || 'Assam'}<br/>
+        <span style="color: #64748b;">Score:</span> <strong>${p.risk_score ? p.risk_score.toFixed(3) : '0.00'}</strong> ${statusBadge}
        </div>`,
-      { sticky: true, className: 'bg-gray-900 border border-gray-700 text-gray-200' }
+      { sticky: true, className: 'bg-white border border-slate-200 text-slate-800 shadow-md font-sans rounded-md' }
     );
   };
 
@@ -200,18 +224,20 @@ export const RiskMap: React.FC<RiskMapProps> = ({
     : recommendedRoute;
 
   return (
-    <div className="relative w-full h-full min-h-[500px] bg-gray-950 overflow-hidden">
+    <div className="relative w-full h-full min-h-0 bg-slate-100 overflow-hidden">
       <MapContainer
         center={assamCenter}
         zoom={7}
         minZoom={6}
         maxZoom={15}
         className="w-full h-full"
+        style={{ height: '100%', width: '100%' }}
         zoomControl={false}
       >
+        <MapResizer />
         <TileLayer
-          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           maxZoom={19}
         />
 
@@ -237,19 +263,19 @@ export const RiskMap: React.FC<RiskMapProps> = ({
               <Polyline
                 positions={alt.coordinates}
                 pathOptions={{
-                  color: isFocused ? '#c084fc' : '#a855f7',
+                  color: isFocused ? '#9333ea' : '#a855f7',
                   weight: isFocused ? 5 : 3.5,
                   dashArray: '8, 8',
-                  opacity: isFocused ? 0.95 : 0.6,
+                  opacity: isFocused ? 0.95 : 0.7,
                 }}
               >
                 <Popup>
-                  <div className="text-xs p-1">
-                    <strong className="text-purple-400">{alt.name}</strong>
+                  <div className="text-xs p-1 text-slate-800">
+                    <strong className="text-purple-600 font-bold">{alt.name}</strong>
                     <br />
                     Distance: {alt.distance_km} km | ETA: {alt.eta_hours}h
                     <br />
-                    Risk Level: <strong className="text-amber-400">{alt.risk_level}</strong>
+                    Risk Level: <strong className="text-amber-600">{alt.risk_level}</strong>
                   </div>
                 </Popup>
               </Polyline>
@@ -265,14 +291,14 @@ export const RiskMap: React.FC<RiskMapProps> = ({
               pathOptions={{
                 color: '#1d4ed8',
                 weight: selectedRouteType === 'recommended' ? 10 : 7,
-                opacity: 0.35,
+                opacity: 0.25,
                 lineCap: 'round',
               }}
             />
             <Polyline
               positions={recommendedRoute.coordinates}
               pathOptions={{
-                color: '#3b82f6',
+                color: '#2563eb',
                 weight: selectedRouteType === 'recommended' ? 5.5 : 4,
                 opacity: 0.95,
                 lineCap: 'round',
@@ -280,14 +306,14 @@ export const RiskMap: React.FC<RiskMapProps> = ({
               }}
             >
               <Popup>
-                <div className="text-xs p-1">
-                  <strong className="text-blue-400">{recommendedRoute.name}</strong>
+                <div className="text-xs p-1 text-slate-800">
+                  <strong className="text-blue-600 font-bold">{recommendedRoute.name}</strong>
                   <br />
                   Distance: {recommendedRoute.distance_km} km | ETA: {recommendedRoute.eta_hours}h
                   <br />
-                  Risk Level: <strong className="text-emerald-400">{recommendedRoute.risk_level}</strong>
+                  Risk Level: <strong className="text-emerald-600">{recommendedRoute.risk_level}</strong>
                   {recommendedRoute.avoided_high_risk_roads ? (
-                    <div className="text-emerald-400 mt-1">
+                    <div className="text-emerald-600 mt-1 font-medium">
                       🛡️ Bypasses {recommendedRoute.avoided_high_risk_roads} high-hazard segments
                     </div>
                   ) : null}
@@ -315,26 +341,26 @@ export const RiskMap: React.FC<RiskMapProps> = ({
               }}
             >
               <Popup>
-                <div className="text-xs p-1 space-y-1">
+                <div className="text-xs p-1 space-y-1 text-slate-800">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="font-bold text-white">{incident.id}</span>
+                    <span className="font-bold text-slate-900">{incident.id}</span>
                     <span
-                      className={`text-[9px] font-bold px-1 rounded ${
-                        isVerified ? 'bg-red-900 text-red-200' : 'bg-amber-900 text-amber-200'
+                      className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
+                        isVerified ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-amber-50 text-amber-800 border border-amber-200'
                       }`}
                     >
                       {incident.status}
                     </span>
                   </div>
-                  <strong className="text-amber-300 block">{incident.road_name}</strong>
-                  <div className="text-gray-300 text-[10px]">{incident.description}</div>
-                  <div className="text-[9px] text-gray-400">
-                    Source: <span className="text-white font-semibold">{incident.source}</span>
+                  <strong className="text-amber-800 block">{incident.road_name}</strong>
+                  <div className="text-slate-600 text-[10px]">{incident.description}</div>
+                  <div className="text-[9px] text-slate-500">
+                    Source: <span className="text-slate-800 font-semibold">{incident.source}</span>
                   </div>
                   {onSelectIncident && (
                     <button
                       onClick={() => onSelectIncident(incident)}
-                      className="w-full mt-1 py-1 px-2 bg-blue-600 hover:bg-blue-500 text-white rounded text-[10px] font-medium transition"
+                      className="w-full mt-1 py-1 px-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-[10px] font-semibold transition"
                     >
                       Review in Incident Queue
                     </button>
@@ -360,34 +386,34 @@ export const RiskMap: React.FC<RiskMapProps> = ({
               }}
             >
               <Popup>
-                <div className="text-xs p-1 space-y-1">
+                <div className="text-xs p-1 space-y-1 text-slate-800">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="font-mono font-bold text-white">{veh.vehicle_number}</span>
+                    <span className="font-mono font-bold text-slate-900">{veh.vehicle_number}</span>
                     <span
                       className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
                         veh.status === 'AT_RISK'
-                          ? 'bg-red-900 text-red-100'
+                          ? 'bg-red-50 text-red-700 border border-red-200'
                           : veh.status === 'REROUTED'
-                          ? 'bg-emerald-900 text-emerald-100'
-                          : 'bg-blue-900 text-blue-100'
+                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                          : 'bg-blue-50 text-blue-700 border border-blue-200'
                       }`}
                     >
                       {veh.status.replace('_', ' ')}
                     </span>
                   </div>
-                  <div className="text-[10px] text-gray-300">
-                    Driver: <strong>{veh.driver_name}</strong>
+                  <div className="text-[10px] text-slate-600">
+                    Driver: <strong className="text-slate-900">{veh.driver_name}</strong>
                   </div>
-                  <div className="text-[9px] text-gray-400">
+                  <div className="text-[9px] text-slate-500">
                     Speed: {veh.speed_kmh} km/h • GPS: {veh.current_latitude.toFixed(3)}, {veh.current_longitude.toFixed(3)}
                   </div>
-                  <div className="text-[9px] text-amber-300 font-medium">
+                  <div className="text-[9px] text-amber-700 font-medium">
                     [Simulated Telemetry]
                   </div>
                   {onSelectVehicle && (
                     <button
                       onClick={() => onSelectVehicle(veh)}
-                      className="w-full mt-1 py-1 px-2 bg-blue-600 hover:bg-blue-500 text-white rounded text-[10px] font-medium transition"
+                      className="w-full mt-1 py-1 px-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-[10px] font-semibold transition"
                     >
                       View Logistics &amp; Detour Options
                     </button>
@@ -402,8 +428,8 @@ export const RiskMap: React.FC<RiskMapProps> = ({
         {originCoord && (
           <Marker position={originCoord} icon={originIcon}>
             <Popup>
-              <div className="text-xs">
-                <strong>Origin Logistics Hub</strong>
+              <div className="text-xs text-slate-800">
+                <strong className="text-emerald-700 font-bold">Origin Logistics Hub</strong>
                 <br />
                 Coordinates: {originCoord[0].toFixed(4)}, {originCoord[1].toFixed(4)}
               </div>
@@ -414,8 +440,8 @@ export const RiskMap: React.FC<RiskMapProps> = ({
         {destCoord && (
           <Marker position={destCoord} icon={destIcon}>
             <Popup>
-              <div className="text-xs">
-                <strong>Destination Point</strong>
+              <div className="text-xs text-slate-800">
+                <strong className="text-blue-700 font-bold">Destination Point</strong>
                 <br />
                 Coordinates: {destCoord[0].toFixed(4)}, {destCoord[1].toFixed(4)}
               </div>

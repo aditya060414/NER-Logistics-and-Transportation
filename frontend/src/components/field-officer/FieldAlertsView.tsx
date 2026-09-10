@@ -41,32 +41,32 @@ export const FieldAlertsView: React.FC<FieldAlertsViewProps> = ({
   };
 
   return (
-    <div className="space-y-4 pb-8 max-w-5xl mx-auto text-xs text-gray-200">
-      <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 shadow-md flex items-center justify-between">
+    <div className="space-y-4 pb-8 max-w-5xl mx-auto text-xs text-slate-700">
+      <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <Bell className="w-5 h-5 text-amber-400" />
-          <h2 className="text-sm md:text-base font-bold text-white uppercase">{t.alerts}</h2>
+          <Bell className="w-5 h-5 text-amber-500" />
+          <h2 className="text-sm md:text-base font-bold text-slate-900 uppercase">{t.alerts}</h2>
         </div>
-        <span className="text-xs font-mono px-2.5 py-1 rounded-xl bg-gray-800 text-gray-300">
+        <span className="text-xs font-mono px-2.5 py-1 rounded-xl bg-slate-100 text-slate-700 border border-slate-200">
           {alerts.length} Total Alerts
         </span>
       </div>
 
       {alerts.length === 0 ? (
-        <div className="p-12 text-center text-gray-400 bg-gray-900 rounded-2xl border border-gray-800">
-          <CheckCircle2 className="w-10 h-10 text-emerald-400 mx-auto mb-2" />
-          <p className="font-bold text-white text-sm">No Active Critical Alerts</p>
-          <p className="text-xs text-gray-500 mt-1">All corridor sections operating within acceptable risk limits.</p>
+        <div className="p-12 text-center text-slate-500 bg-white rounded-2xl border border-slate-200 shadow-xs">
+          <CheckCircle2 className="w-10 h-10 text-emerald-500 mx-auto mb-2" />
+          <p className="font-bold text-slate-900 text-sm">No Active Critical Alerts</p>
+          <p className="text-xs text-slate-500 mt-1">All corridor sections operating within acceptable risk limits.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {alerts.map((a) => (
             <div
               key={a.id}
-              className={`bg-gray-900 border rounded-2xl p-4 shadow-md transition space-y-2.5 flex flex-col justify-between ${
+              className={`bg-white border rounded-2xl p-4 shadow-xs transition space-y-2.5 flex flex-col justify-between ${
                 a.severity === 'CRITICAL'
-                  ? 'border-red-800/80 bg-red-950/20'
-                  : 'border-gray-800'
+                  ? 'border-red-200 bg-rose-50/40'
+                  : 'border-slate-200'
               }`}
             >
               <div>
@@ -74,8 +74,8 @@ export const FieldAlertsView: React.FC<FieldAlertsViewProps> = ({
                   <div className="flex items-center gap-2.5">
                     {getAlertIcon(a.type)}
                     <div>
-                      <span className="font-black text-white text-xs md:text-sm block">{a.title}</span>
-                      <span className="text-[10px] text-gray-400 font-mono">
+                      <span className="font-black text-slate-900 text-xs md:text-sm block">{a.title}</span>
+                      <span className="text-[10px] text-slate-500 font-mono">
                         {a.district || 'Assam Corridor'} • {new Date(a.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>
@@ -84,22 +84,22 @@ export const FieldAlertsView: React.FC<FieldAlertsViewProps> = ({
                   <span
                     className={`text-[10px] font-black px-2 py-0.5 rounded-lg border uppercase ${
                       a.severity === 'CRITICAL'
-                        ? 'bg-red-950 text-red-300 border-red-700'
-                        : 'bg-amber-950 text-amber-300 border-amber-700'
+                        ? 'bg-rose-50 text-rose-700 border-rose-200'
+                        : 'bg-amber-50 text-amber-700 border-amber-200'
                     }`}
                   >
                     {a.severity}
                   </span>
                 </div>
 
-                <p className="text-xs text-gray-300 leading-relaxed mt-2">{a.message}</p>
+                <p className="text-xs text-slate-600 leading-relaxed mt-2">{a.message}</p>
               </div>
 
-              <div className="flex items-center justify-between pt-2 border-t border-gray-800/80">
+              <div className="flex items-center justify-between pt-2 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => onMarkRead(a.id)}
-                  className="text-xs text-gray-400 hover:text-white"
+                  className="text-xs text-slate-500 hover:text-slate-800"
                 >
                   {a.status === 'READ' ? '✓ Acknowledged' : 'Mark as read'}
                 </button>
@@ -107,7 +107,7 @@ export const FieldAlertsView: React.FC<FieldAlertsViewProps> = ({
                 <button
                   type="button"
                   onClick={onNavigateToRoute}
-                  className="text-xs font-bold text-blue-400 hover:text-blue-300 flex items-center gap-1"
+                  className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1"
                 >
                   <span>{t.viewRoute}</span>
                   <ChevronRight className="w-4 h-4" />

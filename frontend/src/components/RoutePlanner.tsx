@@ -76,7 +76,7 @@ export const RoutePlanner: React.FC<RoutePlannerProps> = ({
       });
 
       onRoutesCalculated(response);
-      if (response.recommended) {
+      if (response && response.recommended) {
         onSelectRouteType('recommended');
       }
     } catch (err: any) {
@@ -96,35 +96,35 @@ export const RoutePlanner: React.FC<RoutePlannerProps> = ({
 
   return (
     <div
-      className={`absolute top-4 left-4 z-[1000] w-96 max-w-[calc(100vw-2rem)] bg-gray-900/95 backdrop-blur-md border border-gray-800 rounded-xl shadow-2xl flex flex-col transition-all duration-300 text-gray-200 overflow-hidden ${
+      className={`absolute top-4 left-4 z-[1000] w-96 max-w-[calc(100vw-2rem)] bg-white/95 backdrop-blur-md border border-slate-200 rounded-2xl shadow-xl flex flex-col transition-all duration-300 text-slate-800 overflow-hidden ${
         isMinimized ? 'max-h-14' : 'max-h-[calc(100vh-6rem)]'
       }`}
     >
       {/* Panel Header */}
-      <div className="p-3.5 border-b border-gray-800 flex items-center justify-between bg-gray-950/60 select-none">
+      <div className="p-3.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 select-none">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400">
+          <div className="w-7 h-7 rounded-lg bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600">
             <Navigation className="w-4 h-4" />
           </div>
           <div>
-            <h2 className="text-xs font-bold text-white tracking-wide uppercase">
+            <h2 className="text-xs font-bold text-slate-900 tracking-wide uppercase">
               Risk-Aware Route Planner
             </h2>
-            <p className="text-[10px] text-gray-400">Multi-criteria Dijkstra Safety Corridor</p>
+            <p className="text-[10px] text-slate-500">Multi-criteria Dijkstra Safety Corridor</p>
           </div>
         </div>
 
         <div className="flex items-center gap-1">
           <button
             onClick={() => setIsMinimized(!isMinimized)}
-            className="p-1 rounded text-gray-400 hover:text-white hover:bg-gray-800 transition"
+            className="p-1 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
             title={isMinimized ? 'Expand Planner' : 'Minimize'}
           >
             {isMinimized ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
           </button>
           <button
             onClick={onClose}
-            className="p-1 rounded text-gray-400 hover:text-white hover:bg-gray-800 transition"
+            className="p-1 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
             title="Close"
           >
             <X className="w-4 h-4" />
@@ -133,18 +133,18 @@ export const RoutePlanner: React.FC<RoutePlannerProps> = ({
       </div>
 
       {!isMinimized && (
-        <div className="p-3.5 space-y-3.5 overflow-y-auto text-xs">
+        <div className="p-3.5 space-y-3.5 overflow-y-auto text-xs pb-20">
           {/* Origin & Destination Hub Selectors */}
-          <div className="relative space-y-2 bg-gray-950/50 p-2.5 rounded-lg border border-gray-800/80">
+          <div className="relative space-y-2 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
             {/* Origin */}
             <div>
-              <label className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider block mb-1">
+              <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block mb-1">
                 FROM (Origin Logistics Depot)
               </label>
               <select
                 value={originCity}
                 onChange={(e) => setOriginCity(e.target.value)}
-                className="w-full bg-gray-900 border border-gray-700 rounded-md py-1.5 px-2.5 text-xs text-white focus:outline-none focus:border-blue-500 transition"
+                className="w-full bg-white border border-slate-200 rounded-lg py-1.5 px-2.5 text-xs text-slate-800 font-medium focus:outline-none focus:border-blue-500 shadow-2xs transition"
               >
                 {hubs.map((hub) => (
                   <option key={`orig-${hub.city}`} value={hub.city.toLowerCase()}>
@@ -159,7 +159,7 @@ export const RoutePlanner: React.FC<RoutePlannerProps> = ({
               <button
                 type="button"
                 onClick={handleSwap}
-                className="p-1 rounded-full bg-gray-800 hover:bg-blue-600/30 text-gray-400 hover:text-blue-300 border border-gray-700 transition"
+                className="p-1 rounded-full bg-white hover:bg-slate-100 text-slate-500 hover:text-blue-600 border border-slate-200 shadow-2xs transition"
                 title="Swap Origin and Destination"
               >
                 <ArrowUpDown className="w-3.5 h-3.5" />
@@ -168,13 +168,13 @@ export const RoutePlanner: React.FC<RoutePlannerProps> = ({
 
             {/* Destination */}
             <div>
-              <label className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider block mb-1">
+              <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block mb-1">
                 TO (Critical Destination / Relief Center)
               </label>
               <select
                 value={destCity}
                 onChange={(e) => setDestCity(e.target.value)}
-                className="w-full bg-gray-900 border border-gray-700 rounded-md py-1.5 px-2.5 text-xs text-white focus:outline-none focus:border-blue-500 transition"
+                className="w-full bg-white border border-slate-200 rounded-lg py-1.5 px-2.5 text-xs text-slate-800 font-medium focus:outline-none focus:border-blue-500 shadow-2xs transition"
               >
                 {hubs.map((hub) => (
                   <option key={`dest-${hub.city}`} value={hub.city.toLowerCase()}>
@@ -188,10 +188,10 @@ export const RoutePlanner: React.FC<RoutePlannerProps> = ({
           {/* Cargo Priority Selector */}
           <div>
             <div className="flex justify-between items-center mb-1.5">
-              <label className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
+              <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
                 Cargo Priority (Risk Tolerance)
               </label>
-              <span className="text-[10px] text-blue-400 font-medium">
+              <span className="text-[10px] text-blue-600 font-medium">
                 {priority === 'CRITICAL' && '5.0x Strongest Risk Avoidance'}
                 {priority === 'HIGH' && '3.0x High Risk Penalty'}
                 {priority === 'NORMAL' && '1.5x Balanced Penalty'}
@@ -206,14 +206,14 @@ export const RoutePlanner: React.FC<RoutePlannerProps> = ({
                     key={p}
                     type="button"
                     onClick={() => setPriority(p)}
-                    className={`py-1.5 text-[11px] font-bold rounded border transition ${
+                    className={`py-1.5 text-[11px] font-bold rounded-lg border transition ${
                       isSelected
                         ? p === 'CRITICAL'
-                          ? 'bg-red-600 text-white border-red-500 shadow-sm'
+                          ? 'bg-rose-50 text-rose-700 border-rose-300 shadow-xs'
                           : p === 'HIGH'
-                          ? 'bg-amber-600 text-white border-amber-500 shadow-sm'
-                          : 'bg-blue-600 text-white border-blue-500 shadow-sm'
-                        : 'bg-gray-950/60 text-gray-400 border-gray-800 hover:bg-gray-800 hover:text-gray-200'
+                          ? 'bg-amber-50 text-amber-800 border-amber-300 shadow-xs'
+                          : 'bg-blue-50 text-blue-700 border-blue-300 shadow-xs'
+                        : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 hover:text-slate-900'
                     }`}
                   >
                     {p}
@@ -225,10 +225,10 @@ export const RoutePlanner: React.FC<RoutePlannerProps> = ({
 
           {/* Blocked Roads / Dynamic Closures Badge */}
           {blockedRoadOsmIds.length > 0 && (
-            <div className="bg-red-950/40 border border-red-900/60 rounded-lg p-2.5 text-[11px] space-y-1.5">
+            <div className="bg-rose-50 border border-rose-200 rounded-xl p-2.5 text-[11px] space-y-1.5">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1.5 text-red-300">
-                  <ShieldAlert className="w-4 h-4 shrink-0 text-red-400" />
+                <div className="flex items-center gap-1.5 text-rose-800">
+                  <ShieldAlert className="w-4 h-4 shrink-0 text-rose-600" />
                   <span>
                     <strong>{blockedRoadOsmIds.length}</strong> Road Segments Marked Closed
                   </span>
@@ -237,7 +237,7 @@ export const RoutePlanner: React.FC<RoutePlannerProps> = ({
                   <button
                     type="button"
                     onClick={onClearBlockedRoads}
-                    className="text-[10px] text-red-400 hover:text-red-200 underline"
+                    className="text-[10px] text-rose-700 hover:text-rose-900 font-semibold underline"
                   >
                     Clear All
                   </button>
@@ -247,14 +247,14 @@ export const RoutePlanner: React.FC<RoutePlannerProps> = ({
                 {blockedRoadOsmIds.map((id) => (
                   <span
                     key={`blocked-${id}`}
-                    className="inline-flex items-center gap-1 bg-red-900/60 border border-red-700/60 text-red-200 text-[10px] px-1.5 py-0.5 rounded"
+                    className="inline-flex items-center gap-1 bg-white border border-rose-200 text-rose-700 text-[10px] px-1.5 py-0.5 rounded shadow-2xs"
                   >
                     <span>OSM: {id}</span>
                     {onRemoveBlockedRoad && (
                       <button
                         type="button"
                         onClick={() => onRemoveBlockedRoad(id)}
-                        className="hover:text-white"
+                        className="hover:text-rose-950 font-bold"
                       >
                         ×
                       </button>
@@ -270,7 +270,7 @@ export const RoutePlanner: React.FC<RoutePlannerProps> = ({
             <button
               onClick={handlePlanRoute}
               disabled={isCalculating || originCity === destCity}
-              className="flex-1 py-2 px-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-50 text-white font-bold rounded-lg shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 transition"
+              className="flex-1 py-2 px-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold rounded-xl shadow-xs flex items-center justify-center gap-2 transition"
             >
               {isCalculating ? (
                 <>
@@ -288,7 +288,7 @@ export const RoutePlanner: React.FC<RoutePlannerProps> = ({
             {activeRouteResponse && (
               <button
                 onClick={handleClear}
-                className="py-2 px-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg transition border border-gray-700 text-xs font-medium"
+                className="py-2 px-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition border border-slate-200 text-xs font-semibold"
                 title="Clear active routes"
               >
                 Clear
@@ -297,10 +297,10 @@ export const RoutePlanner: React.FC<RoutePlannerProps> = ({
           </div>
 
           {calcError && (
-            <div className="p-2.5 bg-red-950/80 border border-red-800 text-red-300 rounded-lg text-[11px] flex items-start gap-2">
-              <AlertTriangle className="w-4 h-4 shrink-0 text-red-400 mt-0.5" />
+            <div className="p-2.5 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-[11px] flex items-start gap-2">
+              <AlertTriangle className="w-4 h-4 shrink-0 text-rose-600 mt-0.5" />
               <div>
-                <span className="font-bold block">Routing Calculation Failed</span>
+                <span className="font-bold block text-rose-900">Routing Calculation Failed</span>
                 <span>{calcError}</span>
               </div>
             </div>
@@ -308,21 +308,21 @@ export const RoutePlanner: React.FC<RoutePlannerProps> = ({
 
           {/* Route Results Display */}
           {activeRouteResponse && (
-            <div className="space-y-2.5 pt-1 border-t border-gray-800">
+            <div className="space-y-2.5 pt-1 border-t border-slate-100">
               {/* No Safe Route State */}
               {activeRouteResponse.no_safe_route ? (
-                <div className="p-3 bg-red-950/80 border border-red-700 rounded-lg text-center space-y-2">
-                  <div className="flex items-center justify-center gap-1.5 text-red-400 font-bold text-xs uppercase tracking-wide">
+                <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-center space-y-2">
+                  <div className="flex items-center justify-center gap-1.5 text-rose-700 font-bold text-xs uppercase tracking-wide">
                     <ShieldAlert className="w-4 h-4" />
                     <span>NO SAFE ROUTE AVAILABLE</span>
                   </div>
-                  <p className="text-[11px] text-red-200 leading-relaxed">
+                  <p className="text-[11px] text-rose-800 leading-relaxed">
                     {activeRouteResponse.message ||
                       'All available corridors contain critical flood inundations, landslides, or confirmed road closures.'}
                   </p>
-                  <div className="p-2 bg-red-900/60 rounded border border-red-800 text-[10px] text-red-100 font-semibold">
+                  <div className="p-2 bg-white rounded-lg border border-rose-200 text-[10px] text-rose-900 font-semibold">
                     RECOMMENDED PROTOCOL:{' '}
-                    <span className="text-white underline">
+                    <span className="text-rose-700 underline font-bold">
                       {activeRouteResponse.recommended_action ||
                         'HOLD VEHICLE AT SAFE LOCATION / RELIEF DEPOT'}
                     </span>
@@ -330,7 +330,7 @@ export const RoutePlanner: React.FC<RoutePlannerProps> = ({
                 </div>
               ) : (
                 <>
-                  <div className="flex justify-between items-center text-[10px] text-gray-400 uppercase font-semibold">
+                  <div className="flex justify-between items-center text-[10px] text-slate-400 uppercase font-semibold">
                     <span>Generated Route Options</span>
                     <span>Click card to inspect</span>
                   </div>
@@ -339,26 +339,26 @@ export const RoutePlanner: React.FC<RoutePlannerProps> = ({
                   {activeRouteResponse.recommended && (
                     <div
                       onClick={() => onSelectRouteType('recommended')}
-                      className={`p-3 rounded-lg border cursor-pointer transition-all ${
+                      className={`p-3 rounded-xl border cursor-pointer transition-all ${
                         selectedRouteType === 'recommended'
-                          ? 'bg-blue-950/40 border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.2)]'
-                          : 'bg-gray-950/60 border-gray-800 hover:border-gray-700'
+                          ? 'bg-blue-50/50 border-blue-400 shadow-xs'
+                          : 'bg-slate-50 border-slate-200 hover:border-slate-300'
                       }`}
                     >
                       <div className="flex items-center justify-between mb-1.5">
                         <div className="flex items-center gap-1.5">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-blue-400" />
-                          <span className="text-[11px] font-bold text-blue-300 uppercase tracking-wide">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-blue-600" />
+                          <span className="text-[11px] font-bold text-blue-700 uppercase tracking-wide">
                             RECOMMENDED SAFE ROUTE
                           </span>
                         </div>
                         <span
                           className={`text-[9px] font-bold px-1.5 py-0.5 rounded border ${
                             activeRouteResponse.recommended.risk_level === 'LOW'
-                              ? 'bg-emerald-950 text-emerald-300 border-emerald-800'
+                              ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                               : activeRouteResponse.recommended.risk_level === 'MEDIUM'
-                              ? 'bg-amber-950 text-amber-300 border-amber-800'
-                              : 'bg-red-950 text-red-300 border-red-800'
+                              ? 'bg-amber-50 text-amber-800 border-amber-200'
+                              : 'bg-rose-50 text-rose-700 border-rose-200'
                           }`}
                         >
                           {activeRouteResponse.recommended.risk_level} RISK
@@ -366,18 +366,18 @@ export const RoutePlanner: React.FC<RoutePlannerProps> = ({
                       </div>
 
                       {/* Distance & ETA */}
-                      <div className="grid grid-cols-2 gap-2 text-center my-2 bg-gray-900/80 p-1.5 rounded border border-gray-800/80">
+                      <div className="grid grid-cols-2 gap-2 text-center my-2 bg-white p-2 rounded-lg border border-slate-200 shadow-2xs">
                         <div>
-                          <span className="text-[10px] text-gray-400 block">Distance</span>
-                          <span className="text-xs font-bold text-white">
+                          <span className="text-[10px] text-slate-400 block">Distance</span>
+                          <span className="text-xs font-bold text-slate-900">
                             {activeRouteResponse.recommended.distance_km} km
                           </span>
                         </div>
                         <div>
-                          <span className="text-[10px] text-gray-400 block">Estimated Time</span>
-                          <span className="text-xs font-bold text-blue-300">
+                          <span className="text-[10px] text-slate-400 block">Estimated Time</span>
+                          <span className="text-xs font-bold text-blue-600">
                             {activeRouteResponse.recommended.eta_hours} hrs{' '}
-                            <span className="text-[10px] text-gray-400">
+                            <span className="text-[10px] text-slate-500">
                               ({Math.round(activeRouteResponse.recommended.eta_minutes)}m)
                             </span>
                           </span>
@@ -387,8 +387,8 @@ export const RoutePlanner: React.FC<RoutePlannerProps> = ({
                       {/* Avoided Hazards Highlight */}
                       {activeRouteResponse.recommended.avoided_high_risk_roads &&
                       activeRouteResponse.recommended.avoided_high_risk_roads > 0 ? (
-                        <div className="mb-2 p-1.5 bg-emerald-950/30 border border-emerald-900/50 rounded flex items-center gap-1.5 text-emerald-300 text-[10px]">
-                          <ShieldCheck className="w-3.5 h-3.5 shrink-0 text-emerald-400" />
+                        <div className="mb-2 p-1.5 bg-emerald-50 border border-emerald-200 rounded-lg flex items-center gap-1.5 text-emerald-800 text-[10px]">
+                          <ShieldCheck className="w-3.5 h-3.5 shrink-0 text-emerald-600" />
                           <span>
                             Avoids{' '}
                             <strong>
@@ -401,8 +401,8 @@ export const RoutePlanner: React.FC<RoutePlannerProps> = ({
 
                       {/* Rationale explanation */}
                       {activeRouteResponse.recommended.explanation && (
-                        <div className="text-[10px] text-gray-300 leading-snug bg-gray-900/50 p-2 rounded border border-gray-800">
-                          <span className="font-semibold text-blue-300">Routing Tradeoff: </span>
+                        <div className="text-[10px] text-slate-600 leading-snug bg-white p-2 rounded-lg border border-slate-200">
+                          <span className="font-semibold text-blue-700">Routing Tradeoff: </span>
                           {activeRouteResponse.recommended.explanation}
                         </div>
                       )}
@@ -415,26 +415,26 @@ export const RoutePlanner: React.FC<RoutePlannerProps> = ({
                       <div
                         key={`alt-${idx}`}
                         onClick={() => onSelectRouteType('alternative')}
-                        className={`p-3 rounded-lg border cursor-pointer transition-all ${
+                        className={`p-3 rounded-xl border cursor-pointer transition-all ${
                           selectedRouteType === 'alternative'
-                            ? 'bg-purple-950/40 border-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.2)]'
-                            : 'bg-gray-950/60 border-gray-800 hover:border-gray-700'
+                            ? 'bg-purple-50/50 border-purple-400 shadow-xs'
+                            : 'bg-slate-50 border-slate-200 hover:border-slate-300'
                         }`}
                       >
                         <div className="flex items-center justify-between mb-1.5">
                           <div className="flex items-center gap-1.5">
-                            <Clock className="w-3.5 h-3.5 text-purple-400" />
-                            <span className="text-[11px] font-bold text-purple-300 uppercase tracking-wide">
+                            <Clock className="w-3.5 h-3.5 text-purple-600" />
+                            <span className="text-[11px] font-bold text-purple-700 uppercase tracking-wide">
                               {alt.name}
                             </span>
                           </div>
                           <span
                             className={`text-[9px] font-bold px-1.5 py-0.5 rounded border ${
                               alt.risk_level === 'LOW'
-                                ? 'bg-emerald-950 text-emerald-300 border-emerald-800'
+                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                                 : alt.risk_level === 'MEDIUM'
-                                ? 'bg-amber-950 text-amber-300 border-amber-800'
-                                : 'bg-red-950 text-red-300 border-red-800'
+                                ? 'bg-amber-50 text-amber-800 border-amber-200'
+                                : 'bg-rose-50 text-rose-700 border-rose-200'
                             }`}
                           >
                             {alt.risk_level} RISK
@@ -442,18 +442,18 @@ export const RoutePlanner: React.FC<RoutePlannerProps> = ({
                         </div>
 
                         {/* Distance & ETA */}
-                        <div className="grid grid-cols-2 gap-2 text-center my-2 bg-gray-900/80 p-1.5 rounded border border-gray-800/80">
+                        <div className="grid grid-cols-2 gap-2 text-center my-2 bg-white p-2 rounded-lg border border-slate-200 shadow-2xs">
                           <div>
-                            <span className="text-[10px] text-gray-400 block">Distance</span>
-                            <span className="text-xs font-bold text-white">
+                            <span className="text-[10px] text-slate-400 block">Distance</span>
+                            <span className="text-xs font-bold text-slate-900">
                               {alt.distance_km} km
                             </span>
                           </div>
                           <div>
-                            <span className="text-[10px] text-gray-400 block">Estimated Time</span>
-                            <span className="text-xs font-bold text-purple-300">
+                            <span className="text-[10px] text-slate-400 block">Estimated Time</span>
+                            <span className="text-xs font-bold text-purple-600">
                               {alt.eta_hours} hrs{' '}
-                              <span className="text-[10px] text-gray-400">
+                              <span className="text-[10px] text-slate-500">
                                 ({Math.round(alt.eta_minutes)}m)
                               </span>
                             </span>
@@ -462,8 +462,8 @@ export const RoutePlanner: React.FC<RoutePlannerProps> = ({
 
                         {/* Hazards Warning */}
                         {alt.high_risk_segments > 0 && (
-                          <div className="p-1.5 bg-red-950/30 border border-red-900/50 rounded flex items-center gap-1.5 text-red-300 text-[10px]">
-                            <AlertTriangle className="w-3.5 h-3.5 shrink-0 text-red-400" />
+                          <div className="p-1.5 bg-rose-50 border border-rose-200 rounded-lg flex items-center gap-1.5 text-rose-800 text-[10px]">
+                            <AlertTriangle className="w-3.5 h-3.5 shrink-0 text-rose-600" />
                             <span>
                               Traverses <strong>{alt.high_risk_segments}</strong> high-hazard segments
                             </span>

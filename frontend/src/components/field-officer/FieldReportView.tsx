@@ -114,20 +114,20 @@ export const FieldReportView: React.FC<FieldReportViewProps> = ({
   return (
     <div className="space-y-4 pb-8 max-w-5xl mx-auto">
       {/* Header Banner */}
-      <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 shadow-md flex items-center justify-between">
+      <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <ShieldAlert className="w-5 h-5 text-amber-400" />
+          <ShieldAlert className="w-5 h-5 text-amber-500" />
           <div>
-            <h2 className="text-sm md:text-base font-bold text-white uppercase">{t.reportIncident}</h2>
-            <span className="text-xs text-gray-400">Tactical Field Geo-Hazard Ground Verification Form</span>
+            <h2 className="text-sm md:text-base font-bold text-slate-900 uppercase">{t.reportIncident}</h2>
+            <span className="text-xs text-slate-500">Tactical Field Geo-Hazard Ground Verification Form</span>
           </div>
         </div>
 
         <span
           className={`px-2.5 py-1 rounded-full text-[10px] font-bold border ${
             isOnline
-              ? 'bg-emerald-950 text-emerald-300 border-emerald-700'
-              : 'bg-red-950 text-red-300 border-red-700'
+              ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+              : 'bg-rose-50 text-rose-700 border-rose-200'
           }`}
         >
           {isOnline ? '🟢 ONLINE UPLINK' : '🔴 OFFLINE QUEUE'}
@@ -135,13 +135,13 @@ export const FieldReportView: React.FC<FieldReportViewProps> = ({
       </div>
 
       {/* Form Card */}
-      <form onSubmit={handleSubmit} className="bg-gray-900 border border-gray-800 rounded-2xl p-5 md:p-6 shadow-xl space-y-5 text-xs text-gray-200">
+      <form onSubmit={handleSubmit} className="bg-white border border-slate-200 rounded-2xl p-5 md:p-6 shadow-xs space-y-5 text-xs text-slate-700">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {/* Left Column: Hazard Classification */}
           <div className="space-y-4">
             {/* Incident Type Grid */}
             <div>
-              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-2">
+              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-2">
                 Hazard / Disruption Type
               </label>
               <div className="grid grid-cols-2 gap-2">
@@ -159,8 +159,8 @@ export const FieldReportView: React.FC<FieldReportViewProps> = ({
                     onClick={() => setType(item.id)}
                     className={`py-2.5 px-3 rounded-xl border text-left font-bold transition flex items-center gap-2 ${
                       type === item.id
-                        ? 'bg-amber-600 text-white border-amber-400 shadow-md'
-                        : 'bg-gray-950 text-gray-300 border-gray-800 hover:border-gray-700'
+                        ? 'bg-amber-500 text-white border-amber-600 shadow-xs'
+                        : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
                     }`}
                   >
                     <span className="text-base">{item.icon}</span>
@@ -172,7 +172,7 @@ export const FieldReportView: React.FC<FieldReportViewProps> = ({
 
             {/* Severity Selector */}
             <div>
-              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-2">
+              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-2">
                 Hazard Severity
               </label>
               <div className="grid grid-cols-4 gap-2">
@@ -184,13 +184,13 @@ export const FieldReportView: React.FC<FieldReportViewProps> = ({
                     className={`py-2.5 rounded-xl font-black text-xs border transition ${
                       severity === s
                         ? s === 'CRITICAL'
-                          ? 'bg-red-600 text-white border-red-500 shadow'
+                          ? 'bg-red-600 text-white border-red-600 shadow-xs'
                           : s === 'HIGH'
-                          ? 'bg-orange-600 text-white border-orange-500 shadow'
+                          ? 'bg-orange-600 text-white border-orange-600 shadow-xs'
                           : s === 'MEDIUM'
-                          ? 'bg-amber-600 text-white border-amber-500 shadow'
-                          : 'bg-emerald-600 text-white border-emerald-500 shadow'
-                        : 'bg-gray-950 text-gray-400 border-gray-800 hover:border-gray-700'
+                          ? 'bg-amber-500 text-white border-amber-500 shadow-xs'
+                          : 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+                        : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
                     }`}
                   >
                     {s}
@@ -201,7 +201,7 @@ export const FieldReportView: React.FC<FieldReportViewProps> = ({
 
             {/* Road Corridor Name */}
             <div>
-              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">
+              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">
                 Affected Corridor / Road Name
               </label>
               <input
@@ -209,7 +209,7 @@ export const FieldReportView: React.FC<FieldReportViewProps> = ({
                 required
                 value={roadName}
                 onChange={(e) => setRoadName(e.target.value)}
-                className="w-full bg-gray-950 border border-gray-700 rounded-xl py-2.5 px-3 text-white focus:outline-none focus:border-blue-500 text-xs"
+                className="w-full bg-white border border-slate-200 rounded-xl py-2.5 px-3 text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500 text-xs"
                 placeholder="e.g. NH-27 Km 52 or Bijni-Panbari"
               />
             </div>
@@ -218,15 +218,15 @@ export const FieldReportView: React.FC<FieldReportViewProps> = ({
           {/* Right Column: Telemetry & Notes & Photo */}
           <div className="space-y-4">
             {/* Geo-Tagged Coordinates */}
-            <div className="bg-gray-950 p-3.5 rounded-xl border border-gray-800 space-y-2">
+            <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
                   Geo-Tag Coordinates
                 </span>
                 <button
                   type="button"
                   onClick={handleRefreshGps}
-                  className="text-xs text-blue-400 hover:text-blue-300 font-bold flex items-center gap-1"
+                  className="text-xs text-blue-600 hover:text-blue-700 font-bold flex items-center gap-1"
                 >
                   <MapPin className="w-3.5 h-3.5" />
                   <span>{t.useCurrentGps}</span>
@@ -234,23 +234,23 @@ export const FieldReportView: React.FC<FieldReportViewProps> = ({
               </div>
 
               <div className="grid grid-cols-2 gap-2 font-mono text-xs">
-                <div className="bg-gray-900 px-3 py-2 rounded-lg border border-gray-800">
-                  <span className="text-[9px] text-gray-500 block">Latitude</span>
-                  <span className="text-white font-bold">{latitude.toFixed(5)} N</span>
+                <div className="bg-white px-3 py-2 rounded-lg border border-slate-200">
+                  <span className="text-[9px] text-slate-500 block">Latitude</span>
+                  <span className="text-slate-900 font-bold">{latitude.toFixed(5)} N</span>
                 </div>
-                <div className="bg-gray-900 px-3 py-2 rounded-lg border border-gray-800">
-                  <span className="text-[9px] text-gray-500 block">Longitude</span>
-                  <span className="text-white font-bold">{longitude.toFixed(5)} E</span>
+                <div className="bg-white px-3 py-2 rounded-lg border border-slate-200">
+                  <span className="text-[9px] text-slate-500 block">Longitude</span>
+                  <span className="text-slate-900 font-bold">{longitude.toFixed(5)} E</span>
                 </div>
               </div>
-              <span className="text-[10px] text-gray-500 block">
+              <span className="text-[10px] text-slate-500 block">
                 Accuracy: {gps.status === 'ACTIVE' ? `±${gps.accuracy}m` : 'Simulation / Cache Active'}
               </span>
             </div>
 
             {/* Description Field */}
             <div>
-              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">
+              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">
                 Passage Conditions / Notes
               </label>
               <textarea
@@ -258,22 +258,22 @@ export const FieldReportView: React.FC<FieldReportViewProps> = ({
                 rows={3}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="w-full bg-gray-950 border border-gray-700 rounded-xl py-2 px-3 text-white focus:outline-none focus:border-blue-500 resize-none text-xs"
+                className="w-full bg-white border border-slate-200 rounded-xl py-2 px-3 text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none text-xs"
                 placeholder="Describe debris height, lane blockages, bridge structural fissures..."
               />
             </div>
 
             {/* Photo Attachment Section */}
-            <div className="bg-gray-950 p-3.5 rounded-xl border border-gray-800">
+            <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
                   Visual Evidence (Photo)
                 </span>
                 {photoPreview && (
                   <button
                     type="button"
                     onClick={() => setPhotoPreview(null)}
-                    className="text-xs text-red-400 hover:underline flex items-center gap-0.5"
+                    className="text-xs text-rose-600 hover:underline flex items-center gap-0.5"
                   >
                     <X className="w-3.5 h-3.5" />
                     <span>Remove</span>
@@ -282,9 +282,9 @@ export const FieldReportView: React.FC<FieldReportViewProps> = ({
               </div>
 
               {photoPreview ? (
-                <div className="relative rounded-lg overflow-hidden border border-gray-800 h-28 bg-black flex items-center justify-center">
+                <div className="relative rounded-lg overflow-hidden border border-slate-200 h-28 bg-slate-100 flex items-center justify-center">
                   <img src={photoPreview} alt="Evidence" className="h-full w-full object-cover" />
-                  <span className="absolute bottom-1 right-1 px-1.5 py-0.5 bg-black/80 rounded text-[9px] text-gray-300">
+                  <span className="absolute bottom-1 right-1 px-1.5 py-0.5 bg-white/90 rounded text-[9px] text-slate-700 shadow-xs">
                     Geo-Stamped
                   </span>
                 </div>
@@ -293,12 +293,12 @@ export const FieldReportView: React.FC<FieldReportViewProps> = ({
                   <button
                     type="button"
                     onClick={handleSimulateCamera}
-                    className="py-2.5 px-3 bg-gray-900 hover:bg-gray-800 border border-gray-700 rounded-xl text-center flex items-center justify-center gap-1.5 text-xs text-blue-400 font-bold"
+                    className="py-2.5 px-3 bg-white hover:bg-slate-100 border border-slate-200 rounded-xl text-center flex items-center justify-center gap-1.5 text-xs text-blue-600 font-bold"
                   >
                     <Camera className="w-4 h-4" />
                     <span>Take Photo</span>
                   </button>
-                  <label className="py-2.5 px-3 bg-gray-900 hover:bg-gray-800 border border-gray-700 rounded-xl text-center flex items-center justify-center gap-1.5 text-xs text-gray-300 font-bold cursor-pointer">
+                  <label className="py-2.5 px-3 bg-white hover:bg-slate-100 border border-slate-200 rounded-xl text-center flex items-center justify-center gap-1.5 text-xs text-slate-700 font-bold cursor-pointer">
                     <ImageIcon className="w-4 h-4" />
                     <span>Upload File</span>
                     <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
@@ -310,19 +310,19 @@ export const FieldReportView: React.FC<FieldReportViewProps> = ({
         </div>
 
         {/* Metadata Source Tag */}
-        <div className="flex items-center justify-between text-xs text-gray-400 px-1 pt-2 border-t border-gray-800">
-          <span>Source: <strong className="text-gray-200">OFFICER TELEMETRY</strong></span>
-          <span>Status: <strong className="text-amber-400">UNVERIFIED</strong></span>
+        <div className="flex items-center justify-between text-xs text-slate-500 px-1 pt-2 border-t border-slate-200">
+          <span>Source: <strong className="text-slate-800">OFFICER TELEMETRY</strong></span>
+          <span>Status: <strong className="text-amber-600">UNVERIFIED</strong></span>
         </div>
 
         {/* Submit Button */}
         <button
           type="submit"
           disabled={isSubmitting}
-          className={`w-full py-4 font-bold rounded-xl shadow-xl flex items-center justify-center gap-2 text-xs md:text-sm text-white transition active:scale-[0.98] ${
+          className={`w-full py-4 font-bold rounded-xl shadow-xs flex items-center justify-center gap-2 text-xs md:text-sm text-white transition active:scale-[0.98] ${
             !isOnline
-              ? 'bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 shadow-amber-600/25'
-              : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 shadow-blue-600/25'
+              ? 'bg-amber-600 hover:bg-amber-700 shadow-amber-600/20'
+              : 'bg-blue-600 hover:bg-blue-700 shadow-blue-600/20'
           }`}
         >
           {isSubmitting ? (
@@ -348,15 +348,15 @@ export const FieldReportView: React.FC<FieldReportViewProps> = ({
           <div
             className={`p-3.5 rounded-xl border text-xs flex flex-col gap-2 animate-in fade-in ${
               submitFeedback.type === 'success'
-                ? 'bg-emerald-950/80 border-emerald-700 text-emerald-200'
-                : 'bg-red-950/80 border-red-700 text-red-200'
+                ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                : 'bg-rose-50 border-rose-200 text-rose-800'
             }`}
           >
             <div className="flex items-center gap-2">
               {submitFeedback.type === 'success' ? (
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
               ) : (
-                <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
+                <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
               )}
               <span className="flex-1">{submitFeedback.message}</span>
             </div>
@@ -364,7 +364,7 @@ export const FieldReportView: React.FC<FieldReportViewProps> = ({
               <button
                 type="button"
                 onClick={() => onNavigateTab('route')}
-                className="mt-1 py-1.5 px-3 bg-emerald-900 hover:bg-emerald-800 text-emerald-100 rounded-lg font-bold text-center text-xs self-start"
+                className="mt-1 py-1.5 px-3 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg font-bold text-center text-xs self-start shadow-xs"
               >
                 Return to Active Route →
               </button>

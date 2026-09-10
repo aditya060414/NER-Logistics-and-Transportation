@@ -19,81 +19,97 @@ export const KPICards: React.FC<KPICardsProps> = ({
   const closedRoads = summary?.closed_roads_count ?? 0;
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 p-4 bg-gray-950/60 border-b border-gray-800/80">
+    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 p-4 bg-slate-50/80 border-b border-slate-200">
       {/* High-Risk Roads */}
-      <div className="bg-gray-900/90 border border-red-900/40 rounded-lg p-3 relative overflow-hidden shadow-sm">
+      <div className="bg-white border border-slate-200 border-l-4 border-l-rose-500 rounded-xl p-3.5 relative overflow-hidden shadow-xs hover:shadow-sm hover:border-rose-300 transition-all group">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-medium text-gray-400">High-Risk Roads</span>
-          <AlertTriangle className="w-4 h-4 text-red-400" />
+          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wide">High-Risk Roads</span>
+          <div className="w-7 h-7 rounded-lg bg-rose-50 border border-rose-100 flex items-center justify-center group-hover:bg-rose-100 transition">
+            <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
+          </div>
         </div>
         <div className="mt-2 flex items-baseline gap-2">
-          <span className="text-2xl font-bold text-red-400">{highRisk.toLocaleString()}</span>
-          <span className="text-[10px] text-red-500/80 font-medium">AT RISK</span>
+          <span className="text-2xl font-black text-rose-600">{highRisk.toLocaleString()}</span>
+          <span className="text-[10px] text-rose-700 bg-rose-50 border border-rose-200 font-bold px-1.5 py-0.5 rounded-md">AT RISK</span>
         </div>
-        <div className="mt-1 text-[11px] text-gray-500">
-          Soil saturation &gt; 85%
-        </div>
+        <div className="mt-1 text-[11px] text-slate-400">Soil saturation &gt; 85%</div>
+        <div className="absolute bottom-0 left-0 h-0.5 w-full bg-gradient-to-r from-rose-400 to-transparent opacity-50" />
       </div>
 
       {/* Active Incidents */}
-      <div className="bg-gray-900/90 border border-amber-900/40 rounded-lg p-3 relative overflow-hidden shadow-sm">
+      <div className="bg-white border border-slate-200 border-l-4 border-l-amber-500 rounded-xl p-3.5 relative overflow-hidden shadow-xs hover:shadow-sm hover:border-amber-300 transition-all group">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-medium text-gray-400">Active Incidents</span>
-          <AlertOctagon className="w-4 h-4 text-amber-400" />
+          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wide">Active Incidents</span>
+          <div className="w-7 h-7 rounded-lg bg-amber-50 border border-amber-100 flex items-center justify-center group-hover:bg-amber-100 transition">
+            <AlertOctagon className="w-3.5 h-3.5 text-amber-600" />
+          </div>
         </div>
         <div className="mt-2 flex items-baseline gap-2">
-          <span className="text-2xl font-bold text-amber-400">{activeIncidentsCount}</span>
-          <span className="text-[10px] text-amber-500/80 font-medium">REPORTED</span>
+          <span className="text-2xl font-black text-amber-600">{activeIncidentsCount}</span>
+          <span className="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 font-bold px-1.5 py-0.5 rounded-md">REPORTED</span>
         </div>
-        <div className="mt-1 text-[11px] text-gray-500">
-          Landslides &amp; flood breaches
-        </div>
+        <div className="mt-1 text-[11px] text-slate-400">Landslides &amp; flood breaches</div>
+        <div className="absolute bottom-0 left-0 h-0.5 w-full bg-gradient-to-r from-amber-400 to-transparent opacity-50" />
       </div>
 
       {/* Vehicles Affected */}
-      <div className="bg-gray-900/90 border border-blue-900/40 rounded-lg p-3 relative overflow-hidden shadow-sm">
+      <div className="bg-white border border-slate-200 border-l-4 border-l-blue-500 rounded-xl p-3.5 relative overflow-hidden shadow-xs hover:shadow-sm hover:border-blue-300 transition-all group">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-medium text-gray-400">Vehicles Affected</span>
-          <Truck className="w-4 h-4 text-blue-400" />
+          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wide">Vehicles Affected</span>
+          <div className="w-7 h-7 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center group-hover:bg-blue-100 transition">
+            <Truck className="w-3.5 h-3.5 text-blue-600" />
+          </div>
         </div>
         <div className="mt-2 flex items-baseline gap-2">
-          <span className="text-2xl font-bold text-blue-400">{affectedVehiclesCount}</span>
-          <span className="text-[10px] text-blue-400/80 font-medium">SIMULATED</span>
+          <span className="text-2xl font-black text-blue-600">{affectedVehiclesCount}</span>
+          <span className="text-[10px] text-blue-700 bg-blue-50 border border-blue-200 font-bold px-1.5 py-0.5 rounded-md">SIMULATED</span>
         </div>
-        <div className="mt-1 text-[11px] text-gray-500">
-          En route in risk zones
-        </div>
+        <div className="mt-1 text-[11px] text-slate-400">En route in risk zones</div>
+        <div className="absolute bottom-0 left-0 h-0.5 w-full bg-gradient-to-r from-blue-400 to-transparent opacity-50" />
       </div>
 
       {/* Critical Deliveries */}
-      <div className="bg-gray-900/90 border border-purple-900/40 rounded-lg p-3 relative overflow-hidden shadow-sm">
+      <div className="bg-white border border-slate-200 border-l-4 border-l-violet-500 rounded-xl p-3.5 relative overflow-hidden shadow-xs hover:shadow-sm hover:border-violet-300 transition-all group">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-medium text-gray-400">Critical Deliveries</span>
-          <Package className="w-4 h-4 text-purple-400" />
+          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wide">Critical Deliveries</span>
+          <div className="w-7 h-7 rounded-lg bg-violet-50 border border-violet-100 flex items-center justify-center group-hover:bg-violet-100 transition">
+            <Package className="w-3.5 h-3.5 text-violet-600" />
+          </div>
         </div>
         <div className="mt-2 flex items-baseline gap-2">
-          <span className="text-2xl font-bold text-purple-400">{criticalDeliveriesCount}</span>
-          <span className="text-[10px] text-purple-400/80 font-medium">MEDICINE/FOOD</span>
+          <span className="text-2xl font-black text-violet-600">{criticalDeliveriesCount}</span>
+          <span className="text-[10px] text-violet-700 bg-violet-50 border border-violet-200 font-bold px-1.5 py-0.5 rounded-md">MEDICINE/FOOD</span>
         </div>
-        <div className="mt-1 text-[11px] text-gray-500">
-          Priority 1 &amp; 2 consignments
-        </div>
+        <div className="mt-1 text-[11px] text-slate-400">Priority 1 &amp; 2 consignments</div>
+        <div className="absolute bottom-0 left-0 h-0.5 w-full bg-gradient-to-r from-violet-400 to-transparent opacity-50" />
       </div>
 
       {/* Closed Roads */}
-      <div className="col-span-2 md:col-span-4 lg:col-span-1 bg-gray-900/90 border border-gray-800 rounded-lg p-3 relative overflow-hidden shadow-sm">
+      <div className={`col-span-2 md:col-span-4 lg:col-span-1 bg-white border border-slate-200 border-l-4 ${
+        closedRoads > 0 ? 'border-l-rose-600' : 'border-l-emerald-500'
+      } rounded-xl p-3.5 relative overflow-hidden shadow-xs hover:shadow-sm transition-all group`}>
         <div className="flex items-center justify-between">
-          <span className="text-xs font-medium text-gray-400">Road Closures</span>
-          <Ban className="w-4 h-4 text-gray-400" />
+          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wide">Road Closures</span>
+          <div className={`w-7 h-7 rounded-lg flex items-center justify-center transition ${
+            closedRoads > 0 ? 'bg-rose-50 border border-rose-100 group-hover:bg-rose-100' : 'bg-emerald-50 border border-emerald-100'
+          }`}>
+            <Ban className={`w-3.5 h-3.5 ${closedRoads > 0 ? 'text-rose-600' : 'text-emerald-600'}`} />
+          </div>
         </div>
         <div className="mt-2 flex items-baseline gap-2">
-          <span className="text-2xl font-bold text-gray-200">{closedRoads}</span>
-          <span className="text-[10px] text-gray-400 font-medium">VERIFIED</span>
+          <span className={`text-2xl font-black ${closedRoads > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>{closedRoads}</span>
+          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md border ${
+            closedRoads > 0
+              ? 'text-rose-700 bg-rose-50 border-rose-200'
+              : 'text-emerald-700 bg-emerald-50 border-emerald-200'
+          }`}>VERIFIED</span>
         </div>
-        <div className="mt-1 text-[11px] text-gray-500">
-          Physical barriers in effect
-        </div>
+        <div className="mt-1 text-[11px] text-slate-400">Physical barriers in effect</div>
+        <div className={`absolute bottom-0 left-0 h-0.5 w-full bg-gradient-to-r ${
+          closedRoads > 0 ? 'from-rose-500' : 'from-emerald-400'
+        } to-transparent opacity-50`} />
       </div>
     </div>
   );
 };
+

@@ -2,6 +2,7 @@ import type { RiskSummary, RiskGeoJSON, RoadRiskDetail } from '../types/risk';
 import type { LogisticsHub, RoutePlanRequest, RoutePlanResponse } from '../types/route';
 import type { IncidentsResponse, IncidentCreateRequest, Incident } from '../types/incident';
 import type { Vehicle, Delivery, LogisticsAlert, ImpactEvaluationResponse } from '../types/logistics';
+import type { DistrictWeatherReport } from '../types/weather';
 
 const API_BASE = '/api';
 
@@ -193,6 +194,24 @@ export async function fetchCurrentWeather(): Promise<WeatherCurrent> {
 export async function fetchWeatherForecast(): Promise<WeatherForecastItem[]> {
   const res = await fetch(`${API_BASE}/weather/forecast`);
   if (!res.ok) throw new Error('Failed to fetch weather forecast');
+  return res.json();
+}
+
+export async function fetchDistrictWeatherList(): Promise<DistrictWeatherReport[]> {
+  const res = await fetch(`${API_BASE}/weather/districts`);
+  if (!res.ok) throw new Error('Failed to fetch district weather reports');
+  return res.json();
+}
+
+export async function fetchDistrictWeather(district: string): Promise<DistrictWeatherReport> {
+  const res = await fetch(`${API_BASE}/weather/district/${encodeURIComponent(district)}`);
+  if (!res.ok) throw new Error(`Failed to fetch weather for ${district}`);
+  return res.json();
+}
+
+export async function fetchWeatherAtCoords(lat: number, lon: number): Promise<DistrictWeatherReport> {
+  const res = await fetch(`${API_BASE}/weather/at-coords?lat=${lat}&lon=${lon}`);
+  if (!res.ok) throw new Error('Failed to fetch weather at coordinates');
   return res.json();
 }
 

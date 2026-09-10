@@ -68,25 +68,25 @@ export const DriverAlertsView: React.FC<DriverAlertsViewProps> = ({
   });
 
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-4 p-4 sm:p-6 text-gray-100 font-sans pb-28">
+    <div className="w-full max-w-4xl mx-auto space-y-4 p-4 sm:p-6 text-slate-800 font-sans pb-28">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-gray-900/90 border border-gray-800 rounded-3xl p-5 shadow-2xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white border border-slate-200 rounded-3xl p-5 shadow-xs">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-full bg-red-950/80 border border-red-600/50 text-red-400 text-[10px] font-mono font-bold tracking-wider uppercase">
+            <span className="px-2.5 py-0.5 rounded-full bg-rose-50 border border-rose-200 text-rose-700 text-[10px] font-mono font-bold tracking-wider uppercase">
               SAFETY BROADCASTS
             </span>
           </div>
-          <h2 className="text-xl sm:text-2xl font-black text-white uppercase tracking-tight">
+          <h2 className="text-xl sm:text-2xl font-black text-slate-900 uppercase tracking-tight">
             Corridor Alerts &amp; Advisories
           </h2>
-          <p className="text-xs text-gray-400">
+          <p className="text-xs text-slate-500">
             Real-time hazard notifications, weather advisories, and reroute bulletins.
           </p>
         </div>
 
         {/* Filter Pills */}
-        <div className="flex items-center gap-2 p-1.5 bg-gray-950 border border-gray-800 rounded-2xl">
+        <div className="flex items-center gap-2 p-1.5 bg-slate-100/80 border border-slate-200 rounded-2xl">
           {(['ALL', 'CRITICAL', 'WARNING'] as const).map((f) => (
             <button
               key={f}
@@ -94,8 +94,8 @@ export const DriverAlertsView: React.FC<DriverAlertsViewProps> = ({
               onClick={() => setFilter(f)}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition ${
                 filter === f
-                  ? 'bg-blue-600 text-white shadow-md'
-                  : 'text-gray-400 hover:text-white'
+                  ? 'bg-white text-blue-600 shadow-xs border border-slate-200/60'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
               }`}
             >
               {f}
@@ -113,12 +113,12 @@ export const DriverAlertsView: React.FC<DriverAlertsViewProps> = ({
           return (
             <div
               key={alert.id}
-              className={`p-5 rounded-3xl border transition shadow-xl space-y-3 ${
+              className={`p-5 rounded-3xl border transition shadow-xs space-y-3 ${
                 isCritical
-                  ? 'bg-red-950/40 border-red-600/70'
+                  ? 'bg-rose-50/70 border-rose-200'
                   : isWarning
-                  ? 'bg-amber-950/30 border-amber-600/60'
-                  : 'bg-gray-900/80 border-gray-800'
+                  ? 'bg-amber-50/70 border-amber-200'
+                  : 'bg-white border-slate-200'
               }`}
             >
               <div className="flex items-start justify-between gap-3">
@@ -126,10 +126,10 @@ export const DriverAlertsView: React.FC<DriverAlertsViewProps> = ({
                   <div
                     className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 ${
                       isCritical
-                        ? 'bg-red-600 text-white animate-pulse'
+                        ? 'bg-rose-600 text-white animate-pulse'
                         : isWarning
-                        ? 'bg-amber-600/30 border border-amber-500 text-amber-400'
-                        : 'bg-blue-600/20 text-blue-400'
+                        ? 'bg-amber-100 border border-amber-200 text-amber-800'
+                        : 'bg-blue-50 border border-blue-200 text-blue-600'
                     }`}
                   >
                     {isCritical ? (
@@ -145,43 +145,43 @@ export const DriverAlertsView: React.FC<DriverAlertsViewProps> = ({
                       <span
                         className={`text-[10px] font-mono font-black uppercase px-2 py-0.5 rounded-full ${
                           isCritical
-                            ? 'bg-red-600 text-white'
+                            ? 'bg-rose-100 text-rose-800 border border-rose-200'
                             : isWarning
-                            ? 'bg-amber-500 text-gray-950'
-                            : 'bg-blue-900 text-blue-300'
+                            ? 'bg-amber-100 text-amber-800 border border-amber-200'
+                            : 'bg-blue-50 text-blue-700 border border-blue-200'
                         }`}
                       >
                         {alert.severity}
                       </span>
                       {alert.district && (
-                        <span className="text-[11px] text-gray-300 font-bold flex items-center gap-1">
-                          <MapPin className="w-3 h-3 text-red-400" />
+                        <span className="text-[11px] text-slate-600 font-bold flex items-center gap-1">
+                          <MapPin className="w-3 h-3 text-rose-500" />
                           <span>{alert.district} District</span>
                         </span>
                       )}
                     </div>
-                    <h3 className="text-sm sm:text-base font-black text-white mt-1">
+                    <h3 className="text-sm sm:text-base font-black text-slate-900 mt-1">
                       {alert.title}
                     </h3>
                   </div>
                 </div>
 
-                <span className="text-[10px] font-mono text-gray-400 whitespace-nowrap">
+                <span className="text-[10px] font-mono text-slate-400 whitespace-nowrap">
                   {alert.created_at}
                 </span>
               </div>
 
-              <p className="text-xs text-gray-300 leading-relaxed pl-13">
+              <p className="text-xs text-slate-600 leading-relaxed pl-13">
                 {alert.message}
               </p>
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-800/80">
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => onMarkRead(alert.id)}
-                  className="px-3 py-1.5 rounded-xl bg-gray-950 hover:bg-gray-800 border border-gray-800 text-[11px] font-bold text-gray-300 flex items-center gap-1.5 transition"
+                  className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-[11px] font-bold text-slate-700 flex items-center gap-1.5 transition shadow-xs"
                 >
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                   <span>Acknowledge Notice</span>
                 </button>
               </div>

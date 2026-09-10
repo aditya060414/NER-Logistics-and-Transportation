@@ -23,15 +23,15 @@ export const AlertBanner: React.FC<AlertBannerProps> = ({
   return (
     <div className="absolute top-20 left-1/2 -translate-x-1/2 z-[1500] max-w-xl w-[90%] animate-in fade-in slide-in-from-top-4 duration-300">
       <div
-        className={`p-3 rounded-xl border backdrop-blur-md shadow-2xl flex items-center gap-3 select-none ${
+        className={`p-3 rounded-2xl border backdrop-blur-md shadow-xl flex items-center gap-3 select-none bg-white/95 ${
           isCritical
-            ? 'bg-red-950/90 border-red-500 shadow-[0_0_25px_rgba(239,68,68,0.4)] text-red-100'
-            : 'bg-amber-950/90 border-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.3)] text-amber-100'
+            ? 'border-rose-300 text-slate-900'
+            : 'border-amber-300 text-slate-900'
         }`}
       >
         <div
-          className={`p-2 rounded-lg shrink-0 ${
-            isCritical ? 'bg-red-600 text-white' : 'bg-amber-600 text-white'
+          className={`p-2 rounded-xl shrink-0 ${
+            isCritical ? 'bg-rose-50 text-rose-600 border border-rose-200' : 'bg-amber-50 text-amber-600 border border-amber-200'
           }`}
         >
           {isCritical ? (
@@ -43,19 +43,19 @@ export const AlertBanner: React.FC<AlertBannerProps> = ({
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-extrabold uppercase tracking-wider px-1.5 py-0.2 rounded bg-black/40 border border-white/20">
+            <span className="text-[10px] font-extrabold uppercase tracking-wider px-1.5 py-0.2 rounded bg-slate-100 border border-slate-200 text-slate-700">
               {topAlert.type.replace('_', ' ')}
             </span>
-            <span className="text-xs font-bold text-white truncate">{topAlert.title}</span>
+            <span className="text-xs font-bold text-slate-900 truncate">{topAlert.title}</span>
           </div>
-          <p className="text-[11px] text-gray-200 mt-0.5 line-clamp-1">{topAlert.message}</p>
+          <p className="text-[11px] text-slate-600 mt-0.5 line-clamp-1">{topAlert.message}</p>
         </div>
 
         <div className="flex items-center gap-1.5 shrink-0">
           {onOpenAlertDetails && (
             <button
               onClick={() => onOpenAlertDetails(topAlert)}
-              className="px-2.5 py-1 bg-white/10 hover:bg-white/20 text-white text-[10px] font-bold rounded flex items-center gap-1 transition"
+              className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 text-[10px] font-bold rounded-lg flex items-center gap-1 transition shadow-2xs"
             >
               <span>View</span>
               <ArrowRight className="w-3 h-3" />
@@ -64,7 +64,7 @@ export const AlertBanner: React.FC<AlertBannerProps> = ({
 
           <button
             onClick={() => onDismiss(topAlert.id)}
-            className="p-1 text-white/60 hover:text-white rounded transition"
+            className="p-1 text-slate-400 hover:text-slate-700 rounded-lg transition"
             title="Dismiss Alert"
           >
             <X className="w-4 h-4" />

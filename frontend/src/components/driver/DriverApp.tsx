@@ -206,38 +206,38 @@ export const DriverApp: React.FC<DriverAppProps> = ({ onSwitchRole }) => {
   }
 
   return (
-    <div className="min-h-screen w-full bg-gray-950 text-gray-100 flex flex-col font-sans overflow-x-hidden">
+    <div className="min-h-screen w-full bg-slate-50 text-slate-900 flex flex-col font-sans overflow-x-hidden">
       {/* Top Professional Driver Header */}
-      <header className="bg-gray-900 border-b border-gray-800 px-4 sm:px-6 py-3 flex items-center justify-between gap-3 sticky top-0 z-[3000] shadow-xl shrink-0">
+      <header className="bg-white border-b border-slate-200 px-4 sm:px-6 py-3 flex items-center justify-between gap-3 sticky top-0 z-[3000] shadow-xs shrink-0">
         {/* Brand & Driver Info */}
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center font-black text-base shadow-lg shadow-blue-500/20">
+          <div className="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-black text-base shadow-xs">
             🚚
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-black text-sm text-white tracking-wide">
+              <span className="font-black text-sm text-slate-900 tracking-wide">
                 {driver.name}
               </span>
-              <span className="px-2 py-0.5 rounded-full bg-blue-900/60 border border-blue-500/40 text-blue-300 font-mono text-[10px] font-bold">
+              <span className="px-2 py-0.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 font-mono text-[10px] font-bold">
                 {driver.vehicle_number}
               </span>
             </div>
-            <div className="flex items-center gap-2 text-[11px] text-gray-400">
-              <span className="text-gray-300 font-medium">{t.driver} CONSOLE</span>
+            <div className="flex items-center gap-2 text-[11px] text-slate-500">
+              <span className="text-slate-700 font-medium">{t.driver} CONSOLE</span>
               <span>•</span>
-              <span className="font-mono text-emerald-400 font-bold">{networkStatus}</span>
+              <span className="font-mono text-emerald-600 font-bold">{networkStatus}</span>
             </div>
           </div>
         </div>
 
         {/* Desktop Navigation Tabs */}
-        <nav className="hidden md:flex items-center gap-1 bg-gray-950 p-1 rounded-2xl border border-gray-800 text-xs font-bold">
+        <nav className="hidden md:flex items-center gap-1 bg-slate-100 p-1 rounded-2xl border border-slate-200 text-xs font-bold">
           <button
             type="button"
             onClick={() => setActiveTab('home')}
             className={`px-3.5 py-1.5 rounded-xl transition ${
-              activeTab === 'home' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-400 hover:text-white'
+              activeTab === 'home' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             Home
@@ -246,7 +246,7 @@ export const DriverApp: React.FC<DriverAppProps> = ({ onSwitchRole }) => {
             type="button"
             onClick={() => setActiveTab('new_consignment')}
             className={`px-3.5 py-1.5 rounded-xl transition flex items-center gap-1 ${
-              activeTab === 'new_consignment' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-400 hover:text-white'
+              activeTab === 'new_consignment' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             <PlusCircle className="w-3.5 h-3.5" />
@@ -257,10 +257,10 @@ export const DriverApp: React.FC<DriverAppProps> = ({ onSwitchRole }) => {
               type="button"
               onClick={() => setActiveTab('active_trip')}
               className={`px-3.5 py-1.5 rounded-xl transition flex items-center gap-1.5 ${
-                activeTab === 'active_trip' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-400 hover:text-white'
+                activeTab === 'active_trip' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               <span>In-Transit HUD</span>
             </button>
           )}
@@ -268,7 +268,7 @@ export const DriverApp: React.FC<DriverAppProps> = ({ onSwitchRole }) => {
             type="button"
             onClick={() => setActiveTab('alerts')}
             className={`px-3.5 py-1.5 rounded-xl transition flex items-center gap-1 ${
-              activeTab === 'alerts' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-400 hover:text-white'
+              activeTab === 'alerts' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             <BellRing className="w-3.5 h-3.5" />
@@ -278,7 +278,7 @@ export const DriverApp: React.FC<DriverAppProps> = ({ onSwitchRole }) => {
             type="button"
             onClick={() => setActiveTab('history')}
             className={`px-3.5 py-1.5 rounded-xl transition ${
-              activeTab === 'history' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-400 hover:text-white'
+              activeTab === 'history' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             History
@@ -287,7 +287,7 @@ export const DriverApp: React.FC<DriverAppProps> = ({ onSwitchRole }) => {
             type="button"
             onClick={() => setActiveTab('profile')}
             className={`px-3.5 py-1.5 rounded-xl transition ${
-              activeTab === 'profile' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-400 hover:text-white'
+              activeTab === 'profile' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             Profile
@@ -301,16 +301,16 @@ export const DriverApp: React.FC<DriverAppProps> = ({ onSwitchRole }) => {
             <button
               type="button"
               onClick={() => setIsRoleMenuOpen((prev) => !prev)}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-gray-800 hover:bg-gray-700 border border-gray-700 text-gray-200 text-xs font-bold transition shadow-sm"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 text-xs font-bold transition shadow-xs"
               title="Switch Operational Portal"
             >
-              <ArrowLeftRight className="w-3.5 h-3.5 text-blue-400" />
+              <ArrowLeftRight className="w-3.5 h-3.5 text-blue-600" />
               <span className="hidden sm:inline">Role Switch</span>
             </button>
 
             {isRoleMenuOpen && (
-              <div className="absolute right-0 mt-2 w-48 bg-gray-900 border border-gray-800 rounded-2xl shadow-2xl p-2 z-[4000] text-xs space-y-1 animate-in zoom-in-95">
-                <div className="px-2 py-1 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+              <div className="absolute right-0 mt-2 w-48 bg-white border border-slate-200 rounded-2xl shadow-xl p-2 z-[4000] text-xs space-y-1 animate-in zoom-in-95">
+                <div className="px-2 py-1 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
                   Switch Portal
                 </div>
                 <button
@@ -319,9 +319,9 @@ export const DriverApp: React.FC<DriverAppProps> = ({ onSwitchRole }) => {
                     setIsRoleMenuOpen(false);
                     onSwitchRole('field_officer');
                   }}
-                  className="w-full text-left px-3 py-2 rounded-xl hover:bg-blue-950/60 text-gray-200 hover:text-blue-300 font-bold flex items-center gap-2"
+                  className="w-full text-left px-3 py-2 rounded-xl hover:bg-blue-50 text-slate-700 hover:text-blue-700 font-bold flex items-center gap-2"
                 >
-                  <Smartphone className="w-4 h-4 text-blue-400" />
+                  <Smartphone className="w-4 h-4 text-blue-600" />
                   <span>Field Officer Client</span>
                 </button>
                 <button
@@ -330,9 +330,9 @@ export const DriverApp: React.FC<DriverAppProps> = ({ onSwitchRole }) => {
                     setIsRoleMenuOpen(false);
                     onSwitchRole('admin');
                   }}
-                  className="w-full text-left px-3 py-2 rounded-xl hover:bg-purple-950/60 text-gray-200 hover:text-purple-300 font-bold flex items-center gap-2"
+                  className="w-full text-left px-3 py-2 rounded-xl hover:bg-purple-50 text-slate-700 hover:text-purple-700 font-bold flex items-center gap-2"
                 >
-                  <Shield className="w-4 h-4 text-purple-400" />
+                  <Shield className="w-4 h-4 text-purple-600" />
                   <span>Admin Control Tower</span>
                 </button>
               </div>
@@ -343,7 +343,7 @@ export const DriverApp: React.FC<DriverAppProps> = ({ onSwitchRole }) => {
           <button
             type="button"
             onClick={() => setIsEmergencyModalOpen(true)}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-black uppercase tracking-wider shadow-lg shadow-red-600/30 transition active:scale-95 animate-pulse"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-black uppercase tracking-wider shadow-xs transition active:scale-95"
           >
             <AlertOctagon className="w-4 h-4" />
             <span className="hidden sm:inline">SOS</span>
@@ -396,12 +396,12 @@ export const DriverApp: React.FC<DriverAppProps> = ({ onSwitchRole }) => {
               onEditConsignment={() => setActiveTab('new_consignment')}
             />
           ) : (
-            <div className="p-8 text-center text-gray-400">
+            <div className="p-8 text-center text-slate-500">
               <p>No route preview calculated yet. Please register a consignment first.</p>
               <button
                 type="button"
                 onClick={() => setActiveTab('new_consignment')}
-                className="mt-3 px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded-xl"
+                className="mt-3 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-xs"
               >
                 Create Consignment
               </button>
@@ -422,12 +422,12 @@ export const DriverApp: React.FC<DriverAppProps> = ({ onSwitchRole }) => {
               onOpenEmergencyModal={() => setIsEmergencyModalOpen(true)}
             />
           ) : (
-            <div className="p-8 text-center text-gray-400">
+            <div className="p-8 text-center text-slate-500">
               <p>No active journey in transit.</p>
               <button
                 type="button"
                 onClick={() => setActiveTab('new_consignment')}
-                className="mt-3 px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded-xl"
+                className="mt-3 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-xs"
               >
                 Start New Consignment
               </button>
@@ -472,12 +472,12 @@ export const DriverApp: React.FC<DriverAppProps> = ({ onSwitchRole }) => {
       </main>
 
       {/* Mobile Bottom Navigation Bar (Visible only on mobile screens md:hidden) */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-[3000] bg-gray-950/95 backdrop-blur-md border-t border-gray-800 px-2 py-2 flex items-center justify-around text-[10px] font-bold">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-[3000] bg-white/95 backdrop-blur-md border-t border-slate-200 px-2 py-2 flex items-center justify-around text-[10px] font-bold shadow-xs">
         <button
           type="button"
           onClick={() => setActiveTab('home')}
           className={`flex flex-col items-center gap-1 p-1.5 rounded-xl transition ${
-            activeTab === 'home' ? 'text-blue-400' : 'text-gray-400 hover:text-white'
+            activeTab === 'home' ? 'text-blue-600' : 'text-slate-500 hover:text-slate-800'
           }`}
         >
           <Home className="w-5 h-5" />
@@ -488,7 +488,7 @@ export const DriverApp: React.FC<DriverAppProps> = ({ onSwitchRole }) => {
           type="button"
           onClick={() => setActiveTab('new_consignment')}
           className={`flex flex-col items-center gap-1 p-1.5 rounded-xl transition ${
-            activeTab === 'new_consignment' ? 'text-blue-400' : 'text-gray-400 hover:text-white'
+            activeTab === 'new_consignment' ? 'text-blue-600' : 'text-slate-500 hover:text-slate-800'
           }`}
         >
           <PlusCircle className="w-5 h-5" />
@@ -500,10 +500,10 @@ export const DriverApp: React.FC<DriverAppProps> = ({ onSwitchRole }) => {
             type="button"
             onClick={() => setActiveTab('active_trip')}
             className={`flex flex-col items-center gap-1 p-1.5 rounded-xl transition ${
-              activeTab === 'active_trip' ? 'text-emerald-400' : 'text-gray-400 hover:text-white'
+              activeTab === 'active_trip' ? 'text-emerald-600' : 'text-slate-500 hover:text-slate-800'
             }`}
           >
-            <Navigation className="w-5 h-5 animate-pulse text-emerald-400" />
+            <Navigation className="w-5 h-5 animate-pulse text-emerald-600" />
             <span>In-Transit</span>
           </button>
         )}
@@ -512,7 +512,7 @@ export const DriverApp: React.FC<DriverAppProps> = ({ onSwitchRole }) => {
           type="button"
           onClick={() => setActiveTab('alerts')}
           className={`flex flex-col items-center gap-1 p-1.5 rounded-xl transition ${
-            activeTab === 'alerts' ? 'text-blue-400' : 'text-gray-400 hover:text-white'
+            activeTab === 'alerts' ? 'text-blue-600' : 'text-slate-500 hover:text-slate-800'
           }`}
         >
           <BellRing className="w-5 h-5" />
@@ -523,7 +523,7 @@ export const DriverApp: React.FC<DriverAppProps> = ({ onSwitchRole }) => {
           type="button"
           onClick={() => setActiveTab('profile')}
           className={`flex flex-col items-center gap-1 p-1.5 rounded-xl transition ${
-            activeTab === 'profile' ? 'text-blue-400' : 'text-gray-400 hover:text-white'
+            activeTab === 'profile' ? 'text-blue-600' : 'text-slate-500 hover:text-slate-800'
           }`}
         >
           <User className="w-5 h-5" />

@@ -10,7 +10,8 @@ import {
   X, 
   RefreshCw,
   Eye,
-  Flame
+  Flame,
+  ExternalLink
 } from 'lucide-react';
 import type { Incident, IncidentCreateRequest } from '../types/incident';
 
@@ -24,6 +25,7 @@ interface IncidentPanelProps {
   onSelectIncidentOnMap?: (incident: Incident) => void;
   selectedIncidentId?: string | null;
   isLoading?: boolean;
+  onOpenAllIncidents?: () => void;
 }
 
 export const IncidentPanel: React.FC<IncidentPanelProps> = ({
@@ -36,6 +38,7 @@ export const IncidentPanel: React.FC<IncidentPanelProps> = ({
   onSelectIncidentOnMap,
   selectedIncidentId,
   isLoading = false,
+  onOpenAllIncidents,
 }) => {
   const [filterTab, setFilterTab] = useState<'ALL' | 'UNVERIFIED' | 'VERIFIED' | 'REJECTED'>('UNVERIFIED');
   const [isRadioModalOpen, setIsRadioModalOpen] = useState<boolean>(false);
@@ -44,7 +47,7 @@ export const IncidentPanel: React.FC<IncidentPanelProps> = ({
   // Radio report form state
   const [radioType, setRadioType] = useState<string>('LANDSLIDE');
   const [radioRoadName, setRadioRoadName] = useState<string>('');
-  const [radioDesc, setRadioDesc] = useState<string>('');
+  const [radioDesc, setDesc] = useState<string>('');
   const [radioSeverity, setRadioSeverity] = useState<string>('CRITICAL');
   const [radioLat, setRadioLat] = useState<number>(25.6892);
   const [radioLon, setRadioLon] = useState<number>(92.9341);
@@ -95,7 +98,7 @@ export const IncidentPanel: React.FC<IncidentPanelProps> = ({
       });
       setIsRadioModalOpen(false);
       setRadioRoadName('');
-      setRadioDesc('');
+      setDesc('');
     } catch (err) {
       console.error('Failed to submit radio report:', err);
     } finally {
@@ -105,33 +108,44 @@ export const IncidentPanel: React.FC<IncidentPanelProps> = ({
 
   return (
     <>
-      <div className="absolute top-4 right-4 z-[1000] w-96 max-w-[calc(100vw-2rem)] bg-gray-900/95 backdrop-blur-md border border-gray-800 rounded-xl shadow-2xl flex flex-col max-h-[calc(100vh-6rem)] overflow-hidden animate-in fade-in slide-in-from-right-4 duration-200 text-gray-200">
+      <div className="absolute top-4 right-4 bottom-20 z-[1000] w-[420px] max-w-[calc(100vw-2rem)] bg-white/95 backdrop-blur-md border border-slate-200 rounded-2xl shadow-xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-right-4 duration-200 text-slate-800">
         {/* Panel Header */}
-        <div className="p-3.5 border-b border-gray-800 flex items-center justify-between bg-gray-950/60 select-none">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-amber-600/20 border border-amber-500/30 flex items-center justify-center text-amber-400">
+        <div className="p-3 border-b border-slate-100 flex items-center justify-between bg-slate-50/70 select-none shrink-0 gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="w-7 h-7 rounded-lg bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600 shrink-0">
               <AlertTriangle className="w-4 h-4" />
             </div>
-            <div>
-              <h2 className="text-xs font-bold text-white tracking-wide uppercase">
+            <div className="min-w-0">
+              <h2 className="text-xs font-bold text-slate-900 tracking-wide uppercase truncate">
                 Field Incident Queue
               </h2>
-              <p className="text-[10px] text-gray-400">Control Officer Verification Desk</p>
+              <p className="text-[10px] text-slate-500 truncate">Control Officer Verification Desk</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 shrink-0">
+            <button
+              onClick={() => {
+                if (onOpenAllIncidents) onOpenAllIncidents();
+                else window.location.hash = '#incidents';
+              }}
+              className="flex items-center gap-1 px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-[10px] font-bold transition shadow-2xs whitespace-nowrap"
+              title="Open All Incidents in Fullscreen Portal"
+            >
+              <ExternalLink className="w-3 h-3" />
+              <span>FULL VIEW</span>
+            </button>
             <button
               onClick={() => setIsRadioModalOpen(true)}
-              className="flex items-center gap-1 px-2 py-1 bg-cyan-950 hover:bg-cyan-900 border border-cyan-800 text-cyan-300 rounded text-[10px] font-bold transition shadow-sm"
+              className="flex items-center gap-1 px-2 py-1 bg-sky-50 hover:bg-sky-100 border border-sky-200 text-sky-800 rounded-lg text-[10px] font-bold transition shadow-2xs whitespace-nowrap"
               title="Log Radio Transmission"
             >
-              <Radio className="w-3 h-3 text-cyan-400 animate-pulse" />
-              <span>+ RADIO REPORT</span>
+              <Radio className="w-3 h-3 text-sky-600 animate-pulse" />
+              <span>+ RADIO</span>
             </button>
             <button
               onClick={onClose}
-              className="p-1 rounded text-gray-400 hover:text-white hover:bg-gray-800 transition"
+              className="p-1 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
               title="Close Panel"
             >
               <X className="w-4 h-4" />
@@ -140,18 +154,18 @@ export const IncidentPanel: React.FC<IncidentPanelProps> = ({
         </div>
 
         {/* Filter Tabs */}
-        <div className="grid grid-cols-4 p-1.5 bg-gray-950/40 border-b border-gray-800 text-[10px] font-bold">
+        <div className="grid grid-cols-4 p-1.5 bg-slate-50/60 border-b border-slate-100 text-[10px] font-bold shrink-0">
           <button
             onClick={() => setFilterTab('UNVERIFIED')}
-            className={`py-1 rounded flex items-center justify-center gap-1 transition ${
+            className={`py-1.5 rounded-lg flex items-center justify-center gap-1 transition ${
               filterTab === 'UNVERIFIED'
-                ? 'bg-amber-600/30 text-amber-300 border border-amber-500/40'
-                : 'text-gray-400 hover:text-gray-200'
+                ? 'bg-amber-50 text-amber-800 border border-amber-300 shadow-2xs'
+                : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100/60'
             }`}
           >
             <span>PENDING</span>
             {unverifiedCount > 0 && (
-              <span className="w-4 h-4 rounded-full bg-amber-500 text-gray-950 flex items-center justify-center font-bold text-[9px]">
+              <span className="w-4 h-4 rounded-full bg-amber-500 text-white flex items-center justify-center font-bold text-[9px]">
                 {unverifiedCount}
               </span>
             )}
@@ -159,22 +173,22 @@ export const IncidentPanel: React.FC<IncidentPanelProps> = ({
 
           <button
             onClick={() => setFilterTab('VERIFIED')}
-            className={`py-1 rounded flex items-center justify-center gap-1 transition ${
+            className={`py-1.5 rounded-lg flex items-center justify-center gap-1 transition ${
               filterTab === 'VERIFIED'
-                ? 'bg-emerald-600/30 text-emerald-300 border border-emerald-500/40'
-                : 'text-gray-400 hover:text-gray-200'
+                ? 'bg-emerald-50 text-emerald-800 border border-emerald-300 shadow-2xs'
+                : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100/60'
             }`}
           >
             <span>VERIFIED</span>
-            <span className="text-[9px] text-emerald-400">({verifiedCount})</span>
+            <span className="text-[9px] text-emerald-600 font-bold">({verifiedCount})</span>
           </button>
 
           <button
             onClick={() => setFilterTab('REJECTED')}
-            className={`py-1 rounded transition ${
+            className={`py-1.5 rounded-lg transition ${
               filterTab === 'REJECTED'
-                ? 'bg-red-600/30 text-red-300 border border-red-500/40'
-                : 'text-gray-400 hover:text-gray-200'
+                ? 'bg-rose-50 text-rose-800 border border-rose-300 shadow-2xs'
+                : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100/60'
             }`}
           >
             REJECTED
@@ -182,29 +196,29 @@ export const IncidentPanel: React.FC<IncidentPanelProps> = ({
 
           <button
             onClick={() => setFilterTab('ALL')}
-            className={`py-1 rounded transition ${
+            className={`py-1.5 rounded-lg transition ${
               filterTab === 'ALL'
-                ? 'bg-gray-800 text-gray-200 border border-gray-700'
-                : 'text-gray-400 hover:text-gray-200'
+                ? 'bg-slate-100 text-slate-800 border border-slate-300 shadow-2xs'
+                : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100/60'
             }`}
           >
             ALL ({incidents.length})
           </button>
         </div>
 
-        {/* Incidents List */}
-        <div className="p-3 space-y-3 overflow-y-auto text-xs">
+        {/* Incidents List with flex-1 min-h-0 and bottom padding */}
+        <div className="flex-1 min-h-0 overflow-y-auto p-3 space-y-3 text-xs pb-24">
           {isLoading && (
-            <div className="flex items-center justify-center py-8 text-gray-400 gap-2">
-              <RefreshCw className="w-4 h-4 animate-spin text-amber-400" />
+            <div className="flex items-center justify-center py-8 text-slate-500 gap-2">
+              <RefreshCw className="w-4 h-4 animate-spin text-amber-500" />
               <span>Updating incident telemetry...</span>
             </div>
           )}
 
           {!isLoading && filteredIncidents.length === 0 && (
-            <div className="text-center py-8 text-gray-500 space-y-1">
-              <CheckCircle className="w-6 h-6 mx-auto text-gray-600" />
-              <p className="font-semibold text-xs">No incidents in this queue</p>
+            <div className="text-center py-8 text-slate-400 space-y-1">
+              <CheckCircle className="w-6 h-6 mx-auto text-slate-300" />
+              <p className="font-semibold text-xs text-slate-600">No incidents in this queue</p>
               <p className="text-[10px]">All reported road hazards have been triaged.</p>
             </div>
           )}
@@ -218,30 +232,30 @@ export const IncidentPanel: React.FC<IncidentPanelProps> = ({
             return (
               <div
                 key={incident.id}
-                className={`p-3 rounded-lg border transition-all ${
+                className={`p-3 rounded-xl border transition-all ${
                   isSelected
-                    ? 'bg-amber-950/40 border-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.2)]'
+                    ? 'bg-amber-50/50 border-amber-400 shadow-xs'
                     : isUnverified
-                    ? 'bg-gray-950/70 border-amber-900/50 hover:border-amber-700/80'
+                    ? 'bg-slate-50 border-amber-200 hover:border-amber-300'
                     : isVerified
-                    ? 'bg-emerald-950/20 border-emerald-900/50'
-                    : 'bg-gray-950/40 border-gray-800/80 opacity-60'
+                    ? 'bg-emerald-50/30 border-emerald-200'
+                    : 'bg-slate-50/50 border-slate-200 opacity-60'
                 }`}
               >
                 {/* Header: ID, Source, Severity */}
                 <div className="flex items-center justify-between gap-1 mb-1.5">
                   <div className="flex items-center gap-1.5">
-                    <span className="font-mono font-bold text-white text-[11px]">
+                    <span className="font-mono font-bold text-slate-900 text-[11px]">
                       {incident.id}
                     </span>
                     {/* Source Tag */}
                     <span
                       className={`text-[9px] font-bold px-1.5 py-0.5 rounded border flex items-center gap-1 ${
                         incident.source === 'RADIO'
-                          ? 'bg-cyan-950 text-cyan-300 border-cyan-800'
+                          ? 'bg-sky-50 text-sky-700 border-sky-200'
                           : incident.source === 'OFFICER'
-                          ? 'bg-blue-950 text-blue-300 border-blue-800'
-                          : 'bg-purple-950 text-purple-300 border-purple-800'
+                          ? 'bg-blue-50 text-blue-700 border-blue-200'
+                          : 'bg-purple-50 text-purple-700 border-purple-200'
                       }`}
                     >
                       {incident.source === 'RADIO' ? (
@@ -258,10 +272,10 @@ export const IncidentPanel: React.FC<IncidentPanelProps> = ({
                   <span
                     className={`text-[9px] font-bold px-1.5 py-0.5 rounded border ${
                       incident.severity === 'CRITICAL'
-                        ? 'bg-red-950 text-red-300 border-red-800'
+                        ? 'bg-rose-50 text-rose-700 border-rose-200'
                         : incident.severity === 'HIGH'
-                        ? 'bg-amber-950 text-amber-300 border-amber-800'
-                        : 'bg-gray-800 text-gray-300 border-gray-700'
+                        ? 'bg-amber-50 text-amber-800 border-amber-200'
+                        : 'bg-slate-100 text-slate-700 border-slate-200'
                     }`}
                   >
                     {incident.severity}
@@ -269,24 +283,24 @@ export const IncidentPanel: React.FC<IncidentPanelProps> = ({
                 </div>
 
                 {/* Road Corridor Name */}
-                <h3 className="font-bold text-white text-xs leading-tight mb-1 flex items-center gap-1">
-                  <Flame className="w-3 h-3 text-amber-400 shrink-0" />
+                <h3 className="font-bold text-slate-900 text-xs leading-tight mb-1 flex items-center gap-1">
+                  <Flame className="w-3 h-3 text-amber-500 shrink-0" />
                   <span className="line-clamp-1">{incident.road_name}</span>
                 </h3>
 
                 {/* Location & Coordinates */}
-                <div className="flex items-center gap-2 text-[10px] text-gray-400 mb-1.5">
+                <div className="flex items-center gap-2 text-[10px] text-slate-500 mb-1.5">
                   <span className="flex items-center gap-0.5">
-                    <MapPin className="w-3 h-3 text-gray-500" />
+                    <MapPin className="w-3 h-3 text-slate-400" />
                     {incident.latitude.toFixed(4)}, {incident.longitude.toFixed(4)}
                   </span>
                   {incident.osm_id && (
-                    <span className="text-gray-500">OSM: {incident.osm_id}</span>
+                    <span className="text-slate-400 font-medium">OSM: {incident.osm_id}</span>
                   )}
                 </div>
 
                 {/* Narrative */}
-                <p className="text-[11px] text-gray-300 leading-relaxed mb-2 bg-gray-900/60 p-2 rounded border border-gray-800/80">
+                <p className="text-[11px] text-slate-600 leading-relaxed mb-2 bg-white p-2 rounded-lg border border-slate-200">
                   {incident.description}
                 </p>
 
@@ -296,36 +310,36 @@ export const IncidentPanel: React.FC<IncidentPanelProps> = ({
                     <button
                       onClick={() => handleVerifyClick(incident.id)}
                       disabled={isProcessing}
-                      className="flex-1 py-1.5 px-2 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white font-bold rounded text-[11px] shadow-sm flex items-center justify-center gap-1 transition disabled:opacity-50"
+                      className="flex-1 py-1.5 px-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-[11px] shadow-2xs flex items-center justify-center gap-1 transition disabled:opacity-50"
                     >
                       {isProcessing ? (
                         <RefreshCw className="w-3 h-3 animate-spin" />
                       ) : (
                         <CheckCircle className="w-3 h-3" />
                       )}
-                      <span>VERIFY & CLOSE ROAD</span>
+                      <span>VERIFY &amp; CLOSE ROAD</span>
                     </button>
 
                     <button
                       onClick={() => handleRejectClick(incident.id)}
                       disabled={isProcessing}
-                      className="py-1.5 px-2.5 bg-gray-800 hover:bg-red-950/60 hover:text-red-300 text-gray-400 border border-gray-700 rounded text-[11px] transition disabled:opacity-50"
+                      className="py-1.5 px-2.5 bg-white hover:bg-rose-50 hover:text-rose-700 text-slate-500 border border-slate-200 rounded-lg text-[11px] transition disabled:opacity-50"
                       title="Reject Report"
                     >
                       <XCircle className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 ) : isVerified ? (
-                  <div className="p-1.5 bg-emerald-950/30 border border-emerald-900/60 rounded flex items-center justify-between text-[10px] text-emerald-300">
+                  <div className="p-1.5 bg-emerald-50 border border-emerald-200 rounded-lg flex items-center justify-between text-[10px] text-emerald-800">
                     <span className="flex items-center gap-1 font-semibold">
-                      <CheckCircle className="w-3 h-3 text-emerald-400" />
+                      <CheckCircle className="w-3 h-3 text-emerald-600" />
                       VERIFIED BY CONTROL OFFICER
                     </span>
-                    <span className="text-gray-400">Road Closed</span>
+                    <span className="text-slate-500 font-medium">Road Closed</span>
                   </div>
                 ) : (
-                  <div className="p-1.5 bg-red-950/20 border border-red-900/40 rounded flex items-center justify-between text-[10px] text-red-400">
-                    <span className="flex items-center gap-1">
+                  <div className="p-1.5 bg-rose-50 border border-rose-200 rounded-lg flex items-center justify-between text-[10px] text-rose-700">
+                    <span className="flex items-center gap-1 font-semibold">
                       <XCircle className="w-3 h-3" />
                       REJECTED FALSE REPORT
                     </span>
@@ -336,7 +350,7 @@ export const IncidentPanel: React.FC<IncidentPanelProps> = ({
                 {onSelectIncidentOnMap && (
                   <button
                     onClick={() => onSelectIncidentOnMap(incident)}
-                    className="w-full text-center mt-2 text-[10px] text-blue-400 hover:text-blue-300 flex items-center justify-center gap-1"
+                    className="w-full text-center mt-2 text-[10px] text-blue-600 hover:text-blue-700 font-semibold flex items-center justify-center gap-1"
                   >
                     <Eye className="w-3 h-3" />
                     <span>Focus on Incident Map Pin</span>
@@ -346,40 +360,57 @@ export const IncidentPanel: React.FC<IncidentPanelProps> = ({
             );
           })}
         </div>
+
+        {/* Bottom Quick-Link Footer */}
+        <div className="p-2.5 border-t border-slate-200 bg-white/95 backdrop-blur-xs flex items-center justify-between shrink-0 text-[10px]">
+          <span className="text-slate-500 font-medium">
+            <strong className="text-slate-800 font-bold">{filteredIncidents.length}</strong> {filterTab.toLowerCase()} in queue
+          </span>
+          <button
+            onClick={() => {
+              if (onOpenAllIncidents) onOpenAllIncidents();
+              else window.location.hash = '#incidents';
+            }}
+            className="text-blue-600 hover:text-blue-700 font-bold flex items-center gap-1 hover:underline"
+          >
+            <span>Open Dedicated Portal</span>
+            <ExternalLink className="w-3 h-3" />
+          </button>
+        </div>
       </div>
 
       {/* Radio Report Modal */}
       {isRadioModalOpen && (
-        <div className="fixed inset-0 z-[3000] bg-gray-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-gray-900 border border-cyan-800/80 rounded-xl shadow-2xl w-full max-w-md overflow-hidden text-gray-200 animate-in fade-in zoom-in-95 duration-150">
-            <div className="p-4 border-b border-gray-800 flex items-center justify-between bg-cyan-950/40">
+        <div className="fixed inset-0 z-[3000] bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white border border-slate-200 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden text-slate-800 animate-in fade-in zoom-in-95 duration-150">
+            <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-sky-50/50">
               <div className="flex items-center gap-2">
-                <Radio className="w-4 h-4 text-cyan-400 animate-pulse" />
-                <h3 className="text-sm font-bold text-white uppercase">
+                <Radio className="w-4 h-4 text-sky-600 animate-pulse" />
+                <h3 className="text-sm font-bold text-slate-900 uppercase">
                   Emergency Field Radio Dispatch
                 </h3>
               </div>
               <button
                 onClick={() => setIsRadioModalOpen(false)}
-                className="text-gray-400 hover:text-white"
+                className="text-slate-400 hover:text-slate-700"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <form onSubmit={handleRadioSubmit} className="p-4 space-y-3 text-xs">
-              <p className="text-[11px] text-gray-400">
+              <p className="text-[11px] text-slate-500">
                 Log VHF/HF radio transmissions when mobile network and field internet towers are incapacitated.
               </p>
 
               <div>
-                <label className="text-[10px] font-semibold text-gray-400 uppercase block mb-1">
+                <label className="text-[10px] font-semibold text-slate-500 uppercase block mb-1">
                   Incident Classification
                 </label>
                 <select
                   value={radioType}
                   onChange={(e) => setRadioType(e.target.value)}
-                  className="w-full bg-gray-950 border border-gray-700 rounded py-1.5 px-2 text-white"
+                  className="w-full bg-white border border-slate-200 rounded-lg py-1.5 px-2 text-slate-800 focus:outline-none focus:border-sky-500 shadow-2xs"
                 >
                   <option value="LANDSLIDE">Landslide / Mudflow Blockage</option>
                   <option value="FLOOD">Flash Flood River Overwash</option>
@@ -390,7 +421,7 @@ export const IncidentPanel: React.FC<IncidentPanelProps> = ({
               </div>
 
               <div>
-                <label className="text-[10px] font-semibold text-gray-400 uppercase block mb-1">
+                <label className="text-[10px] font-semibold text-slate-500 uppercase block mb-1">
                   Affected Road / Corridor Segment
                 </label>
                 <input
@@ -399,12 +430,12 @@ export const IncidentPanel: React.FC<IncidentPanelProps> = ({
                   placeholder="e.g. NH-27 Km 140 near Haflong"
                   value={radioRoadName}
                   onChange={(e) => setRadioRoadName(e.target.value)}
-                  className="w-full bg-gray-950 border border-gray-700 rounded py-1.5 px-2 text-white placeholder-gray-600"
+                  className="w-full bg-white border border-slate-200 rounded-lg py-1.5 px-2 text-slate-800 placeholder-slate-400 focus:outline-none focus:border-sky-500 shadow-2xs"
                 />
               </div>
 
               <div>
-                <label className="text-[10px] font-semibold text-gray-400 uppercase block mb-1">
+                <label className="text-[10px] font-semibold text-slate-500 uppercase block mb-1">
                   Radio Telemetry Narrative
                 </label>
                 <textarea
@@ -412,14 +443,14 @@ export const IncidentPanel: React.FC<IncidentPanelProps> = ({
                   rows={3}
                   placeholder="Relay message from field responder: water level, vehicle impassability, damage depth..."
                   value={radioDesc}
-                  onChange={(e) => setRadioDesc(e.target.value)}
-                  className="w-full bg-gray-950 border border-gray-700 rounded py-1.5 px-2 text-white placeholder-gray-600"
+                  onChange={(e) => setDesc(e.target.value)}
+                  className="w-full bg-white border border-slate-200 rounded-lg py-1.5 px-2 text-slate-800 placeholder-slate-400 focus:outline-none focus:border-sky-500 shadow-2xs"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="text-[10px] font-semibold text-gray-400 uppercase block mb-1">
+                  <label className="text-[10px] font-semibold text-slate-500 uppercase block mb-1">
                     Latitude
                   </label>
                   <input
@@ -427,11 +458,11 @@ export const IncidentPanel: React.FC<IncidentPanelProps> = ({
                     step="0.0001"
                     value={radioLat}
                     onChange={(e) => setRadioLat(parseFloat(e.target.value))}
-                    className="w-full bg-gray-950 border border-gray-700 rounded py-1.5 px-2 text-white"
+                    className="w-full bg-white border border-slate-200 rounded-lg py-1.5 px-2 text-slate-800 focus:outline-none focus:border-sky-500 shadow-2xs"
                   />
                 </div>
                 <div>
-                  <label className="text-[10px] font-semibold text-gray-400 uppercase block mb-1">
+                  <label className="text-[10px] font-semibold text-slate-500 uppercase block mb-1">
                     Longitude
                   </label>
                   <input
@@ -439,13 +470,13 @@ export const IncidentPanel: React.FC<IncidentPanelProps> = ({
                     step="0.0001"
                     value={radioLon}
                     onChange={(e) => setRadioLon(parseFloat(e.target.value))}
-                    className="w-full bg-gray-950 border border-gray-700 rounded py-1.5 px-2 text-white"
+                    className="w-full bg-white border border-slate-200 rounded-lg py-1.5 px-2 text-slate-800 focus:outline-none focus:border-sky-500 shadow-2xs"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-[10px] font-semibold text-gray-400 uppercase block mb-1">
+                <label className="text-[10px] font-semibold text-slate-500 uppercase block mb-1">
                   Severity Assessment
                 </label>
                 <div className="grid grid-cols-3 gap-1">
@@ -454,12 +485,12 @@ export const IncidentPanel: React.FC<IncidentPanelProps> = ({
                       key={sev}
                       type="button"
                       onClick={() => setRadioSeverity(sev)}
-                      className={`py-1 text-[10px] font-bold rounded border transition ${
+                      className={`py-1.5 text-[10px] font-bold rounded-lg border transition ${
                         radioSeverity === sev
                           ? sev === 'CRITICAL'
-                            ? 'bg-red-600 text-white border-red-500'
-                            : 'bg-amber-600 text-white border-amber-500'
-                          : 'bg-gray-950 text-gray-400 border-gray-800'
+                            ? 'bg-rose-50 text-rose-700 border-rose-300 shadow-2xs'
+                            : 'bg-amber-50 text-amber-800 border-amber-300 shadow-2xs'
+                          : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
                       }`}
                     >
                       {sev}
@@ -468,18 +499,18 @@ export const IncidentPanel: React.FC<IncidentPanelProps> = ({
                 </div>
               </div>
 
-              <div className="pt-2 flex justify-end gap-2 border-t border-gray-800">
+              <div className="pt-2 flex justify-end gap-2 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setIsRadioModalOpen(false)}
-                  className="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded text-xs"
+                  className="px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 rounded-lg text-xs font-medium"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmittingRadio}
-                  className="px-4 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded text-xs shadow-md shadow-cyan-600/30 flex items-center gap-1.5"
+                  className="px-4 py-1.5 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-lg text-xs shadow-xs flex items-center gap-1.5"
                 >
                   {isSubmittingRadio ? (
                     <RefreshCw className="w-3.5 h-3.5 animate-spin" />

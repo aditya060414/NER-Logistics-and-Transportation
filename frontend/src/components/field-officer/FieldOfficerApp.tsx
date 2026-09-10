@@ -11,8 +11,10 @@ import {
   ArrowLeft,
   Truck,
   Radio,
-  Sliders
+  Sliders,
+  CloudRain
 } from 'lucide-react';
+import { AssamWeatherView } from '../weather/AssamWeatherView';
 import { FieldHomeView } from './FieldHomeView';
 import { FieldRouteView } from './FieldRouteView';
 import { FieldReportView } from './FieldReportView';
@@ -98,6 +100,9 @@ export const FieldOfficerApp: React.FC<FieldOfficerAppProps> = ({ onSwitchToAdmi
 
   // Road Warnings & Reroute Toasts
   const [activeWarning, setActiveWarning] = useState<FieldRoadWarning | null>(null);
+
+  // State-wide Weather Observer Modal (Admin View for Field Officer)
+  const [showAdminWeatherModal, setShowAdminWeatherModal] = useState(false);
 
   // Demo Mode State
   const [demoModeActive, setDemoModeActive] = useState(true);
@@ -420,28 +425,28 @@ export const FieldOfficerApp: React.FC<FieldOfficerAppProps> = ({ onSwitchToAdmi
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 text-gray-100 flex flex-col selection:bg-blue-600 selection:text-white">
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col selection:bg-blue-600 selection:text-white">
       {/* Top Clean Responsive Navigation Header */}
-      <header className="bg-gray-900/95 backdrop-blur-md border-b border-gray-800 px-4 md:px-8 py-3 flex flex-wrap items-center justify-between gap-3 sticky top-0 z-50 shadow-md">
+      <header className="bg-white/95 backdrop-blur-md border-b border-slate-200 px-4 md:px-8 py-3 flex flex-wrap items-center justify-between gap-3 sticky top-0 z-50 shadow-xs">
         <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={onSwitchToAdmin}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-200 border border-gray-700 text-xs font-bold transition group active:scale-95"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 text-xs font-bold transition group active:scale-95"
             title="Switch to Admin Control Tower KPI Dashboard"
           >
-            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform text-blue-400" />
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform text-blue-600" />
             <span>Admin Tower</span>
           </button>
 
-          <div className="h-5 w-[1px] bg-gray-700 hidden sm:block" />
+          <div className="h-5 w-[1px] bg-slate-200 hidden sm:block" />
 
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-sm md:text-base font-black text-white uppercase tracking-wide">
+              <h1 className="text-sm md:text-base font-black text-slate-900 uppercase tracking-wide">
                 ASDMA Field Operations
               </h1>
-              <span className="hidden md:inline-block px-2 py-0.5 rounded-full bg-blue-900/60 text-blue-300 border border-blue-700 text-[10px] font-bold">
+              <span className="hidden md:inline-block px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-bold">
                 Assam Tactical Client
               </span>
             </div>
@@ -456,19 +461,19 @@ export const FieldOfficerApp: React.FC<FieldOfficerAppProps> = ({ onSwitchToAdmi
             onClick={() => setNetworkStatus((prev) => (prev === 'ONLINE' ? 'OFFLINE' : 'ONLINE'))}
             className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-xl border transition cursor-pointer ${
               networkStatus === 'ONLINE'
-                ? 'bg-emerald-950 text-emerald-300 border-emerald-700 hover:bg-emerald-900'
-                : 'bg-red-950 text-red-300 border-red-700 animate-pulse hover:bg-red-900'
+                ? 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100'
+                : 'bg-rose-50 text-rose-800 border-rose-200 animate-pulse hover:bg-rose-100'
             }`}
             title="Click to toggle network connectivity simulation"
           >
             {networkStatus === 'ONLINE' ? (
               <>
-                <Wifi className="w-3.5 h-3.5 text-emerald-400" />
+                <Wifi className="w-3.5 h-3.5 text-emerald-600" />
                 <span>ONLINE</span>
               </>
             ) : (
               <>
-                <WifiOff className="w-3.5 h-3.5 text-red-400" />
+                <WifiOff className="w-3.5 h-3.5 text-rose-600" />
                 <span>OFFLINE</span>
               </>
             )}
@@ -478,7 +483,7 @@ export const FieldOfficerApp: React.FC<FieldOfficerAppProps> = ({ onSwitchToAdmi
           <select
             value={language}
             onChange={(e) => setLanguage(e.target.value as SupportedLanguage)}
-            className="bg-gray-800 border border-gray-700 rounded-xl px-2.5 py-1.5 text-xs text-gray-200 font-bold focus:outline-none cursor-pointer"
+            className="bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-700 font-bold focus:outline-none cursor-pointer shadow-2xs"
           >
             <option value="en">English (EN)</option>
             <option value="as">অসমীয়া (AS)</option>
@@ -498,13 +503,14 @@ export const FieldOfficerApp: React.FC<FieldOfficerAppProps> = ({ onSwitchToAdmi
       </header>
 
       {/* Desktop & Tablet Navigation Bar */}
-      <div className="hidden md:flex bg-gray-900/70 backdrop-blur border-b border-gray-800 px-4 md:px-8 py-2.5 items-center gap-2 overflow-x-auto scrollbar-none sticky top-[57px] z-40">
+      <div className="hidden md:flex bg-white/80 backdrop-blur border-b border-slate-200 px-4 md:px-8 py-2.5 items-center gap-2 overflow-x-auto scrollbar-none sticky top-[57px] z-40">
         {[
           { id: 'home', label: t.home, icon: Home },
           { id: 'route', label: t.route, icon: Navigation },
           { id: 'report', label: t.report, icon: AlertTriangle, highlight: true },
           { id: 'incidents', label: t.incidents, icon: Radio, count: incidents.length },
           { id: 'delivery', label: t.myTask, icon: Truck },
+          { id: 'weather', label: 'Weather (Assam)', icon: CloudRain, count: 35 },
           { id: 'alerts', label: t.alerts, icon: Bell, count: alerts.length, isBadge: true },
           { id: 'settings', label: t.settings, icon: Sliders, count: offlineReports.length },
         ].map((tab) => {
@@ -514,20 +520,26 @@ export const FieldOfficerApp: React.FC<FieldOfficerAppProps> = ({ onSwitchToAdmi
             <button
               key={tab.id}
               type="button"
-              onClick={() => setCurrentTab(tab.id as any)}
+              onClick={() => {
+                if (tab.id === 'weather') {
+                  setShowAdminWeatherModal(true);
+                } else {
+                  setCurrentTab(tab.id as any);
+                }
+              }}
               className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap ${
                 isActive
-                  ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
+                  ? 'bg-blue-600 text-white shadow-xs'
                   : tab.highlight
-                  ? 'bg-amber-950/70 text-amber-300 border border-amber-800/80 hover:bg-amber-900/60'
-                  : 'text-gray-300 hover:text-white hover:bg-gray-800/60'
+                  ? 'bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
               }`}
             >
               <Icon className="w-3.5 h-3.5" />
               <span>{tab.label}</span>
               {tab.count !== undefined && tab.count > 0 && (
                 <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${
-                  isActive ? 'bg-white/20 text-white' : tab.isBadge ? 'bg-red-900 text-red-300 border border-red-700' : 'bg-gray-800 text-gray-300'
+                  isActive ? 'bg-white/20 text-white' : tab.isBadge ? 'bg-rose-100 text-rose-800 border border-rose-200' : tab.id === 'weather' ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'bg-slate-100 text-slate-700'
                 }`}>
                   {tab.count}
                 </span>
@@ -560,6 +572,7 @@ export const FieldOfficerApp: React.FC<FieldOfficerAppProps> = ({ onSwitchToAdmi
             language={language}
             onNavigateTab={setCurrentTab}
             demoModeActive={demoModeActive}
+            onOpenAdminWeather={() => setShowAdminWeatherModal(true)}
           />
         )}
 
@@ -665,13 +678,13 @@ export const FieldOfficerApp: React.FC<FieldOfficerAppProps> = ({ onSwitchToAdmi
       </main>
 
       {/* Mobile-Only Bottom Navigation Bar (Hidden on Tablets/Desktops) */}
-      <nav className="md:hidden bg-gray-900/95 backdrop-blur-md border-t border-gray-800 px-6 py-2.5 flex items-center justify-around fixed bottom-0 left-0 right-0 z-40 shadow-2xl">
+      <nav className="md:hidden bg-white/95 backdrop-blur-md border-t border-slate-200 px-6 py-2.5 flex items-center justify-around fixed bottom-0 left-0 right-0 z-40 shadow-lg">
         {/* Home Tab */}
         <button
           type="button"
           onClick={() => setCurrentTab('home')}
           className={`flex flex-col items-center py-1 px-3 rounded-xl transition ${
-            currentTab === 'home' ? 'text-blue-400 font-bold scale-105' : 'text-gray-400 hover:text-gray-200'
+            currentTab === 'home' ? 'text-blue-600 font-bold scale-105' : 'text-slate-500 hover:text-slate-800'
           }`}
         >
           <Home className="w-5 h-5 mb-0.5" />
@@ -683,7 +696,7 @@ export const FieldOfficerApp: React.FC<FieldOfficerAppProps> = ({ onSwitchToAdmi
           type="button"
           onClick={() => setCurrentTab('route')}
           className={`flex flex-col items-center py-1 px-3 rounded-xl transition ${
-            currentTab === 'route' ? 'text-blue-400 font-bold scale-105' : 'text-gray-400 hover:text-gray-200'
+            currentTab === 'route' ? 'text-blue-600 font-bold scale-105' : 'text-slate-500 hover:text-slate-800'
           }`}
         >
           <Navigation className="w-5 h-5 mb-0.5" />
@@ -696,10 +709,10 @@ export const FieldOfficerApp: React.FC<FieldOfficerAppProps> = ({ onSwitchToAdmi
           onClick={() => setCurrentTab('report')}
           className="flex flex-col items-center -mt-5 group"
         >
-          <div className="w-13 h-13 rounded-full bg-gradient-to-tr from-amber-600 to-orange-500 text-white flex items-center justify-center shadow-lg shadow-amber-600/40 group-active:scale-95 transition border-3 border-gray-950">
+          <div className="w-13 h-13 rounded-full bg-gradient-to-tr from-amber-500 to-orange-500 text-white flex items-center justify-center shadow-md shadow-amber-500/30 group-active:scale-95 transition border-4 border-white">
             <AlertTriangle className="w-6 h-6" />
           </div>
-          <span className="text-[11px] font-bold text-amber-400 mt-1">{t.report}</span>
+          <span className="text-[11px] font-bold text-amber-600 mt-1">{t.report}</span>
         </button>
 
         {/* Alerts Tab */}
@@ -707,13 +720,13 @@ export const FieldOfficerApp: React.FC<FieldOfficerAppProps> = ({ onSwitchToAdmi
           type="button"
           onClick={() => setCurrentTab('alerts')}
           className={`flex flex-col items-center py-1 px-3 rounded-xl transition relative ${
-            currentTab === 'alerts' ? 'text-blue-400 font-bold scale-105' : 'text-gray-400 hover:text-gray-200'
+            currentTab === 'alerts' ? 'text-blue-600 font-bold scale-105' : 'text-slate-500 hover:text-slate-800'
           }`}
         >
           <Bell className="w-5 h-5 mb-0.5" />
           <span className="text-[11px]">{t.alerts}</span>
           {alerts.length > 0 && (
-            <span className="absolute top-0.5 right-2 w-2 h-2 rounded-full bg-red-500" />
+            <span className="absolute top-0.5 right-2 w-2 h-2 rounded-full bg-rose-500" />
           )}
         </button>
 
@@ -722,13 +735,36 @@ export const FieldOfficerApp: React.FC<FieldOfficerAppProps> = ({ onSwitchToAdmi
           type="button"
           onClick={() => setCurrentTab('settings')}
           className={`flex flex-col items-center py-1 px-3 rounded-xl transition ${
-            currentTab === 'settings' ? 'text-blue-400 font-bold scale-105' : 'text-gray-400 hover:text-gray-200'
+            currentTab === 'settings' ? 'text-blue-600 font-bold scale-105' : 'text-slate-500 hover:text-slate-800'
           }`}
         >
           <Menu className="w-5 h-5 mb-0.5" />
           <span className="text-[11px]">{t.more}</span>
         </button>
       </nav>
+
+      {/* State-wide Assam Weather Observer Modal (Admin View for Field Officer) */}
+      {showAdminWeatherModal && (
+        <div className="fixed inset-0 z-50 bg-slate-50 flex flex-col overflow-y-auto">
+          <div className="sticky top-0 z-30 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between shadow-xs">
+            <button
+              type="button"
+              onClick={() => setShowAdminWeatherModal(false)}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition active:scale-95 cursor-pointer"
+            >
+              <ArrowLeft className="w-4 h-4 text-slate-600" />
+              <span>Back to Field Officer Portal</span>
+            </button>
+            <div className="text-right">
+              <span className="text-xs font-bold text-slate-800 block">State-wide Weather Observer Mode</span>
+              <span className="text-[10px] text-blue-600 font-mono">Assam 35 Administrative Districts</span>
+            </div>
+          </div>
+          <div className="p-4 md:p-8 max-w-7xl mx-auto w-full">
+            <AssamWeatherView onBack={() => setShowAdminWeatherModal(false)} />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
