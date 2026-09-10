@@ -8,6 +8,9 @@ import { RoutePlanner } from './components/RoutePlanner';
 import { IncidentPanel } from './components/IncidentPanel';
 import { FleetDrawer } from './components/FleetDrawer';
 import { FieldOfficerModal } from './components/FieldOfficerModal';
+import { FieldOfficerApp } from './components/field-officer/FieldOfficerApp';
+import { DriverApp } from './components/driver/DriverApp';
+import { RoleSelectorModal } from './components/RoleSelectorModal';
 import { AlertBanner } from './components/AlertBanner';
 import { 
   fetchRiskSummary, 
@@ -28,7 +31,8 @@ import type { RiskSummary, RiskGeoJSON, RoadRiskProperties } from './types/risk'
 import type { RoutePlanResponse } from './types/route';
 import type { Incident, IncidentCreateRequest } from './types/incident';
 import type { Vehicle, Delivery, LogisticsAlert } from './types/logistics';
-import { AlertCircle, RefreshCw, Compass, AlertTriangle, Smartphone } from 'lucide-react';
+import { AlertCircle, RefreshCw, Compass, AlertTriangle, Smartphone, Users } from 'lucide-react';
+
 
 export function App() {
   const [summary, setSummary] = useState<RiskSummary | null>(null);
@@ -58,20 +62,45 @@ export function App() {
   const [isFleetDrawerOpen, setIsFleetDrawerOpen] = useState<boolean>(false);
   const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(null);
 
-  const [isFieldOfficerModalOpen, setIsFieldOfficerModalOpen] = useState<boolean>(
-    typeof window !== 'undefined' && (window.location.hash === '#field' || window.location.pathname === '/field')
-  );
+  // Role-Based Architecture: 'admin' vs 'field_officer' vs 'driver'
+  const [activeRole, setActiveRole] = useState<'admin' | 'field_officer' | 'driver'>(() => {
+    if (typeof window !== 'undefined') {
+      if (window.location.hash.includes('driver')) {
+        return 'driver';
+      }
+      if (window.location.hash.includes('field') || window.location.pathname.includes('field')) {
+        return 'field_officer';
+      }
+      const saved = localStorage.getItem('ner_active_role');
+      if (saved === 'field_officer' || saved === 'admin' || saved === 'driver') return saved;
+    }
+    return 'admin';
+  });
+  const [isRoleModalOpen, setIsRoleModalOpen] = useState<boolean>(false);
+
+  const [isFieldOfficerModalOpen, setIsFieldOfficerModalOpen] = useState<boolean>(false);
   const [pendingOfflineCount, setPendingOfflineCount] = useState<number>(0);
 
   useEffect(() => {
     const handleHashChange = () => {
-      if (window.location.hash === '#field' || window.location.pathname === '/field') {
-        setIsFieldOfficerModalOpen(true);
+      if (window.location.hash.includes('driver')) {
+        setActiveRole('driver');
+      } else if (window.location.hash.includes('field')) {
+        setActiveRole('field_officer');
+      } else if (window.location.hash.includes('admin')) {
+        setActiveRole('admin');
       }
     };
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('ner_active_role', activeRole);
+    }
+  }, [activeRole]);
+
 
   const checkOfflineQueue = useCallback(async () => {
     try {
@@ -336,8 +365,32 @@ export function App() {
   const unverifiedCount = incidents.filter((i) => i.status === 'UNVERIFIED').length;
   const atRiskCount = vehicles.filter((v) => v.status === 'AT_RISK').length;
 
+  // Render Dedicated Field Officer Module if activeRole is 'field_officer'
+  if (activeRole === 'field_officer') {
+    return (
+      <FieldOfficerApp
+        onSwitchToAdmin={() => {
+          setActiveRole('admin');
+          window.location.hash = '#admin';
+        }}
+      />
+    );
+  }
+
+  // Render Dedicated Logistics Driver Module if activeRole is 'driver'
+  if (activeRole === 'driver') {
+    return (
+      <DriverApp
+        onSwitchRole={(r) => {
+          setActiveRole(r);
+          window.location.hash = r === 'field_officer' ? '#field-officer' : `#${r}`;
+        }}
+      />
+    );
+  }
+
   return (
-    <div className="flex flex-col h-screen w-screen bg-gray-950 text-gray-100 overflow-hidden font-sans">
+    <div className="flex flex-col min-h-screen w-full bg-gray-950 text-gray-100 font-sans">
       <Header
         scenarioName={summary?.active_monsoon_scenario || 'Assam Monsoon 2022'}
         onRefresh={() => loadData(selectedFilter)}
@@ -353,9 +406,18 @@ export function App() {
         isFleetDrawerOpen={isFleetDrawerOpen}
         onToggleFleetDrawer={() => setIsFleetDrawerOpen((prev) => !prev)}
         atRiskVehiclesCount={atRiskCount}
-        onOpenFieldOfficerModal={() => setIsFieldOfficerModalOpen(true)}
+        onSwitchToFieldOfficer={() => {
+          setActiveRole('field_officer');
+          window.location.hash = '#field-officer';
+        }}
+        onSwitchToDriver={() => {
+          setActiveRole('driver');
+          window.location.hash = '#driver';
+        }}
         pendingOfflineCount={pendingOfflineCount}
       />
+
+
 
       <KPICards
         summary={summary}
@@ -371,7 +433,7 @@ export function App() {
         onOpenAlertDetails={handleOpenAlertDetails}
       />
 
-      <div className="relative flex-1 w-full h-full overflow-hidden">
+      <div className="relative flex-1 w-full min-h-[520px] h-[calc(100vh-180px)] overflow-hidden">
         {isLoading && (
           <div className="absolute inset-0 z-[2000] bg-gray-950/70 backdrop-blur-sm flex flex-col items-center justify-center gap-3">
             <RefreshCw className="w-8 h-8 text-blue-400 animate-spin" />
@@ -524,6 +586,31 @@ export function App() {
           </div>
         )}
 
+        {/* Floating Portal Switcher Button */}
+        <div className="absolute bottom-6 right-6 z-[1200]">
+          <button
+            type="button"
+            onClick={() => setIsRoleModalOpen(true)}
+            className="flex items-center gap-2 px-3.5 py-2.5 rounded-2xl bg-gray-900/90 hover:bg-gray-800 text-white font-bold text-xs border border-blue-500/50 shadow-2xl backdrop-blur-md transition group active:scale-95"
+          >
+            <Users className="w-4 h-4 text-blue-400 group-hover:scale-110 transition-transform" />
+            <span>Switch Role / Portal</span>
+          </button>
+        </div>
+
+        {/* Role Selection Gateway Modal */}
+        <RoleSelectorModal
+          isOpen={isRoleModalOpen}
+          onClose={() => setIsRoleModalOpen(false)}
+          currentRole={activeRole}
+          onSelectRole={(r) => {
+            setActiveRole(r);
+            if (r === 'field_officer') window.location.hash = '#field-officer';
+            else if (r === 'driver') window.location.hash = '#driver';
+            else window.location.hash = '#admin';
+          }}
+        />
+
         {/* Selected Road Details Panel */}
         <RoadDetailPanel
           selectedRoad={selectedRoad}
@@ -537,3 +624,4 @@ export function App() {
 }
 
 export default App;
+

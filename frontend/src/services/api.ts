@@ -160,3 +160,125 @@ export async function resetLogistics(): Promise<{ success: boolean }> {
   if (!res.ok) throw new Error('Failed to reset logistics state');
   return res.json();
 }
+
+// Weather Intelligence API
+export interface WeatherCurrent {
+  status: string;
+  station: string;
+  date: string;
+  condition: string;
+  mean_24h_rainfall_mm: number;
+  max_24h_rainfall_mm: number;
+  peak_hazard_district: string;
+  soil_moisture_saturation_pct: number;
+  flood_alert_level: string;
+  data_provenance: string;
+}
+
+export interface WeatherForecastItem {
+  day: string;
+  date: string;
+  rainfall_forecast_mm: number;
+  condition: string;
+  risk_impact: string;
+  corridor_advisory: string;
+}
+
+export async function fetchCurrentWeather(): Promise<WeatherCurrent> {
+  const res = await fetch(`${API_BASE}/weather/current`);
+  if (!res.ok) throw new Error('Failed to fetch weather telemetry');
+  return res.json();
+}
+
+export async function fetchWeatherForecast(): Promise<WeatherForecastItem[]> {
+  const res = await fetch(`${API_BASE}/weather/forecast`);
+  if (!res.ok) throw new Error('Failed to fetch weather forecast');
+  return res.json();
+}
+
+export async function updateDeliveryStatus(
+  deliveryId: string,
+  data: { status: string; delay_minutes?: number; risk_level?: string }
+): Promise<{ success: boolean; delivery: Delivery }> {
+  const res = await fetch(`${API_BASE}/logistics/deliveries/${deliveryId}/status`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error('Failed to update delivery status');
+  return res.json();
+}
+
+export async function updateVehicleTelemetry(
+  vehicleId: string,
+  data: { latitude: number; longitude: number; speed_kmh?: number; status?: string }
+): Promise<{ success: boolean; vehicle: Vehicle }> {
+  const res = await fetch(`${API_BASE}/logistics/vehicles/${vehicleId}/telemetry`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error('Failed to update vehicle telemetry');
+  return res.json();
+}
+
+// Driver & Consignment Specific API Methods
+export async function createConsignmentDelivery(data: {
+  consignment_id?: string;
+  cargo_name: string;
+  cargo_type: string;
+  priority: string;
+  origin: string;
+  origin_lat: number;
+  origin_lon: number;
+  destination: string;
+  dest_lat: number;
+  dest_lon: number;
+  driver_id?: string;
+  vehicle_id?: string;
+  quantity?: number;
+  unit?: string;
+  weight_kg?: number;
+  notes?: string;
+}): Promise<{ success: boolean; delivery: Delivery; consignment_id: string; message: string }> {
+  const res = await fetch(`${API_BASE}/deliveries`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => null);
+    throw new Error(err?.detail || 'Failed to register consignment');
+  }
+  return res.json();
+}
+
+export async function fetchMyDeliveries(driverId?: string, vehicleId?: string): Promise<Delivery[]> {
+  const params = new URLSearchParams();
+  if (driverId) params.append('driver_id', driverId);
+  if (vehicleId) params.append('vehicle_id', vehicleId);
+  
+  const res = await fetch(`${API_BASE}/deliveries/my?${params.toString()}`);
+  if (!res.ok) throw new Error('Failed to fetch driver deliveries');
+  return res.json();
+}
+
+export async function fetchDeliveryById(deliveryId: string): Promise<Delivery> {
+  const res = await fetch(`${API_BASE}/deliveries/${deliveryId}`);
+  if (!res.ok) throw new Error(`Delivery ${deliveryId} not found`);
+  return res.json();
+}
+
+export async function updateDeliveryDetails(
+  deliveryId: string,
+  data: Partial<Delivery>
+): Promise<{ success: boolean; delivery: Delivery }> {
+  const res = await fetch(`${API_BASE}/deliveries/${deliveryId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error('Failed to update delivery');
+  return res.json();
+}
+

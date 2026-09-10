@@ -143,9 +143,29 @@ vehicles_db = [dict(v) for v in INITIAL_VEHICLES]
 deliveries_db = [dict(d) for d in INITIAL_DELIVERIES]
 alerts_db = [dict(a) for a in INITIAL_ALERTS]
 alert_seq = 103
+delivery_seq = 105
+consignment_seq = 105
 
 class ImpactEvaluationRequest(BaseModel):
     closed_osm_ids: List[str] = Field(default_factory=list, description="OSM Road segment IDs marked CLOSED")
+
+class ConsignmentCreateRequest(BaseModel):
+    cargo_name: Optional[str] = None
+    cargo_type: str = Field(default="MEDICINE", description="MEDICINE, FOOD, RELIEF MATERIAL, AGRICULTURAL GOODS, CONSTRUCTION MATERIAL, FUEL / ESSENTIAL SUPPLY, GENERAL GOODS, OTHER")
+    priority: str = Field(default="CRITICAL", description="CRITICAL, HIGH, NORMAL, LOW")
+    quantity: int = Field(default=120)
+    unit: str = Field(default="BOXES")
+    weight_kg: float = Field(default=350.0)
+    description: Optional[str] = "Essential medical supplies"
+    origin: Optional[str] = "Guwahati Central Depot"
+    origin_lat: float = 26.1445
+    origin_lon: float = 91.7362
+    destination: Optional[str] = "Haflong Dima Hasao Civil Hospital"
+    destination_lat: float = 25.1706
+    destination_lon: float = 93.0175
+    vehicle_id: Optional[str] = "AS-01-TR-102"
+    driver_id: Optional[str] = "DRV-102"
+    driver_name: Optional[str] = "Raj"
 
 @router.get("/vehicles")
 def get_vehicles() -> List[Dict[str, Any]]:
@@ -156,6 +176,80 @@ def get_vehicles() -> List[Dict[str, Any]]:
 def get_deliveries() -> List[Dict[str, Any]]:
     """Returns all active priority deliveries."""
     return deliveries_db
+
+@router.get("/deliveries/my")
+def get_my_deliveries(driver_id: Optional[str] = None, vehicle_id: Optional[str] = None) -> List[Dict[str, Any]]:
+    """Returns deliveries matching driver or vehicle ID."""
+    if driver_id:
+        res = [d for d in deliveries_db if d.get("driver_id") == driver_id]
+        if res:
+            return res
+    if vehicle_id:
+        res = [d for d in deliveries_db if d.get("assigned_vehicle_id") == vehicle_id]
+        if res:
+            return res
+    return deliveries_db
+
+@router.get("/deliveries/{delivery_id}")
+def get_delivery(delivery_id: str) -> Dict[str, Any]:
+    """Returns single delivery by ID or consignment ID."""
+    target = next((d for d in deliveries_db if d["id"] == delivery_id or d.get("consignment_id") == delivery_id), None)
+    if not target:
+        raise HTTPException(status_code=404, detail="Delivery not found")
+    return target
+
+@router.post("/deliveries")
+def create_consignment_delivery(req: ConsignmentCreateRequest) -> Dict[str, Any]:
+    """
+    Creates and stores a new consignment delivery record.
+    Used by the Driver Dashboard when submitting consignment.
+    """
+    global delivery_seq, consignment_seq
+    delivery_id = f"D{delivery_seq}"
+    consignment_id = f"CN-2026-00{consignment_seq}"
+    delivery_seq += 1
+    consignment_seq += 1
+
+    new_delivery = {
+        "id": delivery_id,
+        "consignment_id": consignment_id,
+        "cargo_name": req.cargo_name or req.description or f"{req.cargo_type} Consignment",
+        "cargo_type": req.cargo_type,
+        "priority": req.priority,
+        "quantity": req.quantity,
+        "unit": req.unit,
+        "weight_kg": req.weight_kg,
+        "description": req.description or req.cargo_name or f"{req.cargo_type} supplies",
+        "origin": req.origin or f"Location ({req.origin_lat:.4f}, {req.origin_lon:.4f})",
+        "origin_coords": {"lat": req.origin_lat, "lon": req.origin_lon},
+        "destination": req.destination or f"Destination ({req.destination_lat:.4f}, {req.destination_lon:.4f})",
+        "destination_coords": {"lat": req.destination_lat, "lon": req.destination_lon},
+        "assigned_vehicle_id": req.vehicle_id or "AS-01-TR-102",
+        "driver_id": req.driver_id or "DRV-102",
+        "driver_name": req.driver_name or "Raj",
+        "status": "PLANNED",
+        "scheduled_eta": datetime.now(timezone.utc).isoformat(),
+        "delay_minutes": 0,
+        "risk_level": "MEDIUM" if req.priority == "CRITICAL" else "LOW",
+        "reroute_active": False,
+        "alternate_route_summary": None,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+    }
+    deliveries_db.insert(0, new_delivery)
+    return {"success": True, "delivery": new_delivery, "consignment_id": consignment_id}
+
+@router.patch("/deliveries/{delivery_id}")
+def patch_delivery_details(delivery_id: str, req: Dict[str, Any]) -> Dict[str, Any]:
+    """Updates any delivery fields."""
+    target_d = next((d for d in deliveries_db if d["id"] == delivery_id or d.get("consignment_id") == delivery_id), None)
+    if not target_d:
+        raise HTTPException(status_code=404, detail="Delivery not found")
+    for k, v in req.items():
+        target_d[k] = v
+    target_d["updated_at"] = datetime.now(timezone.utc).isoformat()
+    return {"success": True, "delivery": target_d}
+
 
 @router.get("/alerts")
 def get_alerts() -> List[Dict[str, Any]]:
@@ -272,6 +366,41 @@ def dispatch_reroute(vehicle_id: str) -> Dict[str, Any]:
         "delivery": target_d
     }
 
+@router.patch("/deliveries/{delivery_id}/status")
+def update_delivery_status(delivery_id: str, req: Dict[str, Any]) -> Dict[str, Any]:
+    """Updates status and delay for an assigned delivery."""
+    target_d = next((d for d in deliveries_db if d["id"] == delivery_id), None)
+    if not target_d:
+        raise HTTPException(status_code=404, detail="Delivery not found")
+    
+    if "status" in req:
+        target_d["status"] = req["status"]
+    if "delay_minutes" in req:
+        target_d["delay_minutes"] = req["delay_minutes"]
+    if "risk_level" in req:
+        target_d["risk_level"] = req["risk_level"]
+
+    return {"success": True, "delivery": target_d}
+
+@router.patch("/vehicles/{vehicle_id}/telemetry")
+def update_vehicle_telemetry(vehicle_id: str, req: Dict[str, Any]) -> Dict[str, Any]:
+    """Updates vehicle coordinates and speed telemetry."""
+    target_v = next((v for v in vehicles_db if v["id"] == vehicle_id), None)
+    if not target_v:
+        raise HTTPException(status_code=404, detail="Vehicle not found")
+
+    if "latitude" in req:
+        target_v["current_latitude"] = req["latitude"]
+    if "longitude" in req:
+        target_v["current_longitude"] = req["longitude"]
+    if "speed_kmh" in req:
+        target_v["speed_kmh"] = req["speed_kmh"]
+    if "status" in req:
+        target_v["status"] = req["status"]
+    target_v["last_updated"] = datetime.now(timezone.utc).isoformat()
+
+    return {"success": True, "vehicle": target_v}
+
 @router.post("/reset")
 def reset_logistics() -> Dict[str, Any]:
     """Resets fleet, deliveries, and alerts to baseline demo scenario."""
@@ -280,3 +409,14 @@ def reset_logistics() -> Dict[str, Any]:
     deliveries_db = [dict(d) for d in INITIAL_DELIVERIES]
     alerts_db = [dict(a) for a in INITIAL_ALERTS]
     return {"success": True, "message": "Logistics state reset successfully."}
+
+
+# Direct alias router for /api/deliveries
+deliveries_router = APIRouter(prefix="/api/deliveries", tags=["Deliveries API"])
+deliveries_router.add_api_route("", get_deliveries, methods=["GET"])
+deliveries_router.add_api_route("/my", get_my_deliveries, methods=["GET"])
+deliveries_router.add_api_route("/{delivery_id}", get_delivery, methods=["GET"])
+deliveries_router.add_api_route("", create_consignment_delivery, methods=["POST"])
+deliveries_router.add_api_route("/{delivery_id}", patch_delivery_details, methods=["PATCH"])
+deliveries_router.add_api_route("/{delivery_id}/status", update_delivery_status, methods=["PATCH"])
+

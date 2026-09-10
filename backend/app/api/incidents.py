@@ -13,7 +13,7 @@ class IncidentCreate(BaseModel):
     type: str = Field(..., description="Incident type: LANDSLIDE, FLOOD, ROAD_BREACH, TREE_FALL, BRIDGE_DAMAGE")
     road_name: str = Field(..., description="Name of the affected road or corridor")
     description: str = Field(..., description="Detailed description of blockage/damage")
-    source: str = Field(default="CITIZEN", description="Source: CITIZEN, OFFICER, RADIO, CONTROL_ROOM")
+    source: str = Field(default="CITIZEN", description="Source: CITIZEN, OFFICER, DRIVER, RADIO, CONTROL_ROOM")
     latitude: float = Field(..., description="Latitude WGS84")
     longitude: float = Field(..., description="Longitude WGS84")
     osm_id: Optional[str] = Field(None, description="Optional associated OSM Road ID")

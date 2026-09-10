@@ -8,13 +8,22 @@ ROOT_DIR = Path(__file__).resolve().parent.parent.parent
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-from backend.app.api.risk import router as risk_router
-from backend.app.api.routes import router as routes_router
-from backend.app.api.incidents import router as incidents_router
-from backend.app.api.logistics import router as logistics_router
-from backend.app.api.dashboard import router as dashboard_router
-from backend.app.api.weather import router as weather_router
+try:
+    from backend.app.api.risk import router as risk_router
+    from backend.app.api.routes import router as routes_router
+    from backend.app.api.incidents import router as incidents_router
+    from backend.app.api.logistics import router as logistics_router, deliveries_router
+    from backend.app.api.dashboard import router as dashboard_router
+    from backend.app.api.weather import router as weather_router
+except ImportError:
+    from app.api.risk import router as risk_router
+    from app.api.routes import router as routes_router
+    from app.api.incidents import router as incidents_router
+    from app.api.logistics import router as logistics_router, deliveries_router
+    from app.api.dashboard import router as dashboard_router
+    from app.api.weather import router as weather_router
 from ml.data_loader import get_data_loader
+
 
 app = FastAPI(
     title="NER Logistics Intelligence Platform API",
@@ -35,6 +44,7 @@ app.include_router(risk_router)
 app.include_router(routes_router)
 app.include_router(incidents_router)
 app.include_router(logistics_router)
+app.include_router(deliveries_router)
 app.include_router(dashboard_router)
 app.include_router(weather_router)
 

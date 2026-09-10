@@ -16,15 +16,36 @@ export interface Vehicle {
 
 export interface Delivery {
   id: string;
+  consignment_id?: string;
   cargo_name: string;
-  cargo_type: 'MEDICINE' | 'FOOD' | 'EQUIPMENT' | 'GENERAL';
+  cargo_type: string;
   priority: 'CRITICAL' | 'HIGH' | 'NORMAL' | 'LOW';
   origin: string;
   origin_coords: { lat: number; lon: number };
   destination: string;
   destination_coords: { lat: number; lon: number };
   assigned_vehicle_id: string | null;
-  status: 'IN_TRANSIT' | 'REROUTED_IN_TRANSIT' | 'DISPATCH_PENDING' | 'DELIVERED';
+  driver_id?: string | null;
+  driver_name?: string | null;
+  driver_phone?: string | null;
+  quantity?: number;
+  unit?: string;
+  weight_kg?: number;
+  description?: string;
+  notes?: string;
+  status: 
+    | 'IN_TRANSIT' 
+    | 'REROUTED_IN_TRANSIT' 
+    | 'DISPATCH_PENDING' 
+    | 'DELIVERED'
+    | 'ASSIGNED'
+    | 'ACCEPTED'
+    | 'DELAYED'
+    | 'AT_RISK'
+    | 'REROUTED'
+    | 'ARRIVED'
+    | 'COMPLETED'
+    | 'CANCELLED';
   scheduled_eta: string;
   delay_minutes: number;
   risk_level: 'LOW' | 'MEDIUM' | 'HIGH';

@@ -16,7 +16,8 @@ interface HeaderProps {
   isFleetDrawerOpen: boolean;
   onToggleFleetDrawer: () => void;
   atRiskVehiclesCount: number;
-  onOpenFieldOfficerModal: () => void;
+  onSwitchToFieldOfficer?: () => void;
+  onSwitchToDriver?: () => void;
   pendingOfflineCount: number;
 }
 
@@ -35,9 +36,12 @@ export const Header: React.FC<HeaderProps> = ({
   isFleetDrawerOpen,
   onToggleFleetDrawer,
   atRiskVehiclesCount,
-  onOpenFieldOfficerModal,
+  onSwitchToFieldOfficer,
+  onSwitchToDriver,
   pendingOfflineCount,
 }) => {
+
+
   return (
     <header className="bg-gray-900 border-b border-gray-800 px-6 py-3.5 flex flex-wrap items-center justify-between gap-4 select-none">
       <div className="flex items-center gap-3">
@@ -46,46 +50,61 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-lg font-bold tracking-wide text-white uppercase m-0">
-              NER Logistics Intelligence
+            <h1 className="text-base font-bold tracking-tight text-white flex items-center gap-2">
+              <span>NER Logistics Intelligence Platform</span>
+              <span className="text-xs px-2 py-0.5 rounded bg-blue-900/60 border border-blue-700/60 text-blue-300 font-mono font-normal">
+                CONTROL TOWER
+              </span>
             </h1>
-            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-900/60 text-blue-300 border border-blue-700/50">
-              Assam Operations
-            </span>
           </div>
-          <p className="text-xs text-gray-400">
-            Active Scenario: <span className="text-gray-300 font-medium">{scenarioName || 'Assam Monsoon 2022'}</span>
-          </p>
+          <div className="flex items-center gap-2 mt-0.5 text-xs text-gray-400">
+            <span>Scenario:</span>
+            <span className="text-gray-200 font-medium">{scenarioName}</span>
+            <span className="text-gray-600">•</span>
+            <span className="text-blue-400">NetworkX Risk Engine Active</span>
+          </div>
         </div>
       </div>
 
-      <div className="flex items-center gap-3">
-        {/* System Status Badge */}
-        <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-md bg-gray-800/80 border border-gray-700 text-xs">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#10b981]"></span>
-          <span className="text-gray-300 font-medium">Control Tower Online</span>
-          <span className="text-gray-500">|</span>
-          <span className="text-gray-400">13,093 Roads Monitored</span>
-        </div>
+      {/* Action Controls */}
+      <div className="flex items-center gap-2.5">
+        {/* Driver Portal Direct Switcher */}
+        {onSwitchToDriver && (
+          <button
+            onClick={onSwitchToDriver}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-md shadow-emerald-600/20 border border-emerald-400/50 transition group active:scale-95"
+            title="Switch into Logistics Driver Console"
+          >
+            <Truck className="w-4 h-4 text-white group-hover:scale-110 transition-transform" />
+            <span>DRIVER PORTAL</span>
+            <span className="px-1.5 py-0.2 rounded-full bg-emerald-950 text-emerald-300 font-mono font-bold text-[10px]">
+              TRIP
+            </span>
+          </button>
+        )}
 
-        {/* Field App Launcher (Offline Ready) */}
-        <button
-          onClick={onOpenFieldOfficerModal}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold bg-gray-800 hover:bg-gray-700 text-cyan-300 border border-cyan-800/60 hover:border-cyan-500 transition shadow-sm"
-          title="Open Field Officer Mobile App"
-        >
-          <Smartphone className="w-4 h-4 text-cyan-400" />
-          <span>FIELD APP</span>
-          {pendingOfflineCount > 0 ? (
-            <span className="px-1.5 py-0.2 rounded-full bg-red-600 text-white font-bold text-[10px] animate-pulse">
-              {pendingOfflineCount} QUEUED
-            </span>
-          ) : (
-            <span className="text-[9px] bg-cyan-950 text-cyan-400 px-1 rounded border border-cyan-800">
-              IDB
-            </span>
-          )}
-        </button>
+        {/* Field Officer Client Direct Switcher */}
+        {onSwitchToFieldOfficer && (
+          <button
+            onClick={onSwitchToFieldOfficer}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-md shadow-blue-600/20 border border-blue-400/50 transition group active:scale-95"
+            title="Switch into Field Officer Mobile Tactical Route Interface"
+          >
+            <Smartphone className="w-4 h-4 text-white group-hover:scale-110 transition-transform" />
+            <span>FIELD OFFICER CLIENT</span>
+            {pendingOfflineCount > 0 ? (
+              <span className="px-1.5 py-0.2 rounded-full bg-amber-500 text-gray-950 font-black text-[10px] animate-pulse">
+                {pendingOfflineCount} QUEUED
+              </span>
+            ) : (
+              <span className="px-1.5 py-0.2 rounded-full bg-red-500 text-white font-black text-[10px] animate-pulse">
+                D102
+              </span>
+            )}
+          </button>
+        )}
+
+
 
         {/* Fleet & Logistics Impact Toggle */}
         <button
